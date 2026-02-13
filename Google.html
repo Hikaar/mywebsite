@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dylan Townsley | IT Engineer & Systems Strategist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sakura: #ffb7c5;
+            --navy: #0f172a;
+            --slate: #475569;
+            --ice: #f8fafc;
+            --transition: all 0.4s ease;
+        }
+
+        /* --- GLOBAL STYLE --- */
+        body {
+            margin: 0;
+            background-color: var(--ice);
+            color: var(--navy);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 100px 20px; }
+
+        /* --- SAKURA ACCENT ANIMATION --- */
+        .sakura-petal {
+            position: fixed;
+            background: var(--sakura);
+            border-radius: 150% 0 150% 0;
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: -1;
+            animation: drift linear infinite;
+        }
+
+        @keyframes drift {
+            0% { transform: translateY(-10vh) rotate(0deg); }
+            100% { transform: translateY(110vh) rotate(360deg); }
+        }
+
+        /* --- HEADER --- */
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .title-area h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            margin: 0;
+            letter-spacing: -1px;
+            color: var(--navy);
+        }
+
+        .title-area p {
+            font-size: 1.2rem;
+            color: var(--slate);
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        .divider {
+            width: 60px;
+            height: 4px;
+            background: var(--sakura);
+            margin: 30px auto;
+        }
+
+        /* --- BIO / PERSONAL BLURB --- */
+        .intro-text {
+            font-size: 1.25rem;
+            font-weight: 400;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 100px;
+            color: var(--navy);
+        }
+
+        .intro-text span {
+            background: linear-gradient(to bottom, transparent 60%, var(--sakura) 60%);
+        }
+
+        /* --- SECTIONS --- */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+            border: 1px solid rgba(15, 23, 42, 0.05);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--slate);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2::after {
+            content: "";
+            flex-grow: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .card p, .card li {
+            font-size: 1rem;
+            color: var(--slate);
+        }
+
+        /* --- THE ASD STORY --- */
+        .feature-card {
+            grid-column: span 2;
+            background: var(--navy);
+            color: white;
+        }
+
+        .feature-card h2 { color: var(--sakura); }
+        .feature-card p { color: #cbd5e1; }
+
+        /* --- NAVIGATION --- */
+        .nav-dock {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-link {
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .primary { background: var(--navy); color: white; border: none; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .primary:hover { background: var(--sakura); color: var(--navy); }
+        
+        .secondary { background: white; color: var(--navy); border: 1px solid #e2e8e0; }
+        .secondary:hover { border-color: var(--sakura); }
+
+        /* --- PRINT ENGINE --- */
+        @media print {
+            body { background: white; }
+            .nav-dock, .sakura-petal { display: none !important; }
+            .container { padding: 0; max-width: 100%; }
+            .grid { display: block; }
+            .card { border: none; border-bottom: 1px solid #eee; box-shadow: none; padding: 20px 0; }
+            .feature-card { background: white; color: black; border-bottom: 2px solid black; }
+            .feature-card h2, .feature-card p { color: black; }
+            .title-area h1 { font-size: 30pt; }
+        }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+            .feature-card { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sakura-container"></div>
+
+    <div class="container">
+        <header>
+            <div class="title-area">
+                <h1>Dylan Townsley</h1>
+                <p>IT Engineer & Systems Specialist</p>
+                <div class="divider"></div>
+            </div>
+        </header>
+
+        <section class="intro-text">
+            I am a technical problem-solver who believes that <span>resilient systems</span> are built on <span>resilient communication</span>. With a professional background in both enterprise IT and human support, I bring a unique level of patience, clarity, and stability to every project I lead.
+        </section>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Technical Philosophy</h2>
+                <p>I specialize in bridging the gap between complex infrastructure and business-ready solutions. My approach is defined by:</p>
+                <ul>
+                    <li>Rapid adoption of emerging technologies</li>
+                    <li>Extreme stability under high-pressure scenarios</li>
+                    <li>Systems architecture designed for long-term scalability</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>Outside the Office</h2>
+                <p>I find my balance through strategy and precision—whether that's navigating the slopes on a <strong>snowboard</strong>, analyzing the <strong>NE Patriots'</strong> latest play, or the methodical logistics of <strong>Warhammer 40k</strong>.</p>
+            </div>
+
+            <div class="card feature-card">
+                <h2>The Human Element</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                    <div>
+                        <p>Before transitioning into full-time IT Engineering, I worked as a <strong>Support Worker for individuals with ASD</strong>. This experience is the cornerstone of my professional identity.</p>
+                    </div>
+                    <div>
+                        <p>It instilled in me an <strong>extraordinary level of patience</strong> and the ability to de-escalate crisis situations with calm, logical communication—skills that are invaluable when managing critical system failures or complex stakeholder needs.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Key Competencies</h2>
+                <p style="margin-bottom: 10px;"><strong>Infrastructure:</strong> Cloud Architecture, Network Security, Server Optimization.</p>
+                <p><strong>Soft Skills:</strong> Crisis Management, Technical Training, Empathetic Leadership.</p>
+            </div>
+
+            <div class="card">
+                <h2>Current Mission</h2>
+                <p>Currently focused on delivering 99.9% uptime and streamlining IT operations for modern, high-growth environments where technology must move as fast as the business.</p>
+            </div>
+        </div>
+
+        <footer style="margin-top: 100px; text-align: center; color: var(--slate); font-size: 0.8rem; letter-spacing: 2px;">
+            DYLAN TOWNSLEY &copy; 2026 // BUILT FOR EXCELLENCE
+        </footer>
+    </div>
+
+    <nav class="nav-dock">
+        <a href="index.html" class="nav-link secondary">HOME</a>
+        <button class="nav-link primary" onclick="window.print()">DOWNLOAD CV</button>
+    </nav>
+
+    <script>
+        // Subtle Sakura Background
+        const container = document.getElementById('sakura-container');
+        for (let i = 0; i < 15; i++) {
+            const petal = document.createElement('div');
+            petal.className = 'sakura-petal';
+            petal.style.left = Math.random() * 100 + 'vw';
+            petal.style.width = Math.random() * 10 + 5 + 'px';
+            petal.style.height = petal.style.width;
+            petal.style.animationDuration = Math.random() * 5 + 5 + 's';
+            petal.style.animationDelay = Math.random() * 5 + 's';
+            container.appendChild(petal);
+        }
+    </script>
+</body>
+</html>
