@@ -1,703 +1,593 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dylan Townsley — IT Engineer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dylan Townsley &mdash; IT Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --black:#05060F;
+  --navy:#0A0E1A;
+  --panel:#0F1525;
+  --border:#1E2840;
+  --pink:#F0A0B8;
+  --pink2:#E8749A;
+  --pink3:#FFD4E3;
+  --glow:rgba(240,160,184,0.12);
+  --white:#F0EEF5;
+  --mid:#8892A4;
+  --sans:'Space Grotesk',sans-serif;
+  --mono:'DM Mono',monospace;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--white);font-family:var(--sans);font-size:16px;line-height:1.7;overflow-x:hidden;}
 
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* CANVAS PETALS */
+#petals{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.5;}
 
-    :root {
-      --bg: #F7F5F0;
-      --ink: #111110;
-      --mid: #6B6760;
-      --faint: #E2DED7;
-      --accent: #2A4D3E;
-      --accent-light: #D6E8E1;
-      --serif: 'Cormorant Garamond', Georgia, serif;
-      --mono: 'DM Mono', monospace;
-    }
+/* CURSOR */
+*{cursor:none;}
+#cur{position:fixed;top:0;left:0;z-index:9999;width:12px;height:12px;border:1.5px solid var(--pink);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;}
+#cur.big{width:36px;height:36px;background:var(--glow);}
 
-    html { scroll-behavior: smooth; }
+/* PROGRESS */
+#prog{position:fixed;top:0;left:0;z-index:999;height:1px;width:0%;background:linear-gradient(90deg,var(--pink2),var(--pink3));box-shadow:0 0 8px var(--pink);transition:width .1s linear;}
 
-    body {
-      background: var(--bg);
-      color: var(--ink);
-      font-family: var(--serif);
-      font-weight: 300;
-      font-size: 18px;
-      line-height: 1.7;
-      overflow-x: hidden;
-    }
+/* NOISE */
+body::after{content:'';position:fixed;inset:0;z-index:1;opacity:.03;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:180px;}
 
-    /* ── CURSOR ── */
-    * { cursor: none; }
-    #cursor {
-      position: fixed; top: 0; left: 0; z-index: 9999;
-      width: 10px; height: 10px;
-      background: var(--accent);
-      border-radius: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      transition: transform 0.15s ease, width 0.25s ease, height 0.25s ease, background 0.25s ease;
-      mix-blend-mode: multiply;
-    }
-    #cursor.expanded { width: 40px; height: 40px; background: var(--accent); opacity: 0.3; }
+/* LAYOUT */
+.wrap{max-width:920px;margin:0 auto;padding:0 56px;position:relative;z-index:2;}
 
-    /* ── NOISE OVERLAY ── */
-    body::before {
-      content: '';
-      position: fixed; inset: 0; z-index: 0;
-      opacity: 0.025;
-      pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      background-size: 180px;
-    }
+/* NAV */
+nav{position:fixed;top:0;right:0;z-index:100;padding:28px 56px;display:flex;gap:36px;background:linear-gradient(to bottom,rgba(5,6,15,.95),transparent);}
+nav a{font-family:var(--mono);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--mid);text-decoration:none;transition:color .25s;position:relative;}
+nav a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--pink);transition:width .3s;}
+nav a:hover{color:var(--pink);}
+nav a:hover::after{width:100%;}
 
-    /* ── PROGRESS BAR ── */
-    #progress {
-      position: fixed; top: 0; left: 0; z-index: 999;
-      height: 2px; width: 0%;
-      background: var(--accent);
-      transition: width 0.1s linear;
-    }
+/* ══════════ HEADER ══════════ */
+header{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:100px 0 80px;position:relative;overflow:hidden;}
 
-    /* ── LAYOUT ── */
-    .container {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 0 40px;
-      position: relative; z-index: 1;
-    }
+.h-kicker{font-family:var(--mono);font-size:10px;letter-spacing:.35em;text-transform:uppercase;color:var(--pink);margin-bottom:28px;opacity:0;animation:fadeUp .7s ease .3s forwards;display:flex;align-items:center;gap:16px;}
+.h-kicker::before{content:'';width:32px;height:1px;background:var(--pink);box-shadow:0 0 8px var(--pink);}
 
-    /* ── HEADER ── */
-    header {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 80px 0 60px;
-      position: relative;
-    }
+.h-name{font-size:clamp(64px,10vw,130px);font-weight:700;line-height:.88;letter-spacing:-.03em;margin-bottom:8px;opacity:0;animation:fadeUp .8s ease .45s forwards;}
+.h-name .last{display:block;background:linear-gradient(135deg,var(--pink3) 0%,var(--pink) 40%,var(--pink2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 24px rgba(240,160,184,.35));}
 
-    .header-tag {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--mid);
-      margin-bottom: 32px;
-      opacity: 0;
-      animation: fadeUp 0.8s ease 0.2s forwards;
-    }
+.h-sub{font-size:clamp(15px,2vw,19px);color:var(--mid);max-width:460px;line-height:1.65;margin-bottom:40px;opacity:0;animation:fadeUp .8s ease .55s forwards;font-style:italic;}
 
-    .name {
-      font-size: clamp(52px, 9vw, 104px);
-      font-weight: 300;
-      line-height: 0.95;
-      letter-spacing: -0.02em;
-      margin-bottom: 24px;
-      opacity: 0;
-      animation: fadeUp 0.9s ease 0.35s forwards;
-    }
+.h-badge{display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--white);border:1px solid var(--border);padding:10px 20px;margin-bottom:48px;opacity:0;animation:fadeUp .8s ease .65s forwards;position:relative;overflow:hidden;}
+.h-badge::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--glow),transparent);transform:translateX(-100%);animation:shimmer 3.5s ease 2s infinite;}
+.h-dot{width:6px;height:6px;border-radius:50%;background:var(--pink);box-shadow:0 0 8px var(--pink);animation:pulse 2s ease infinite;}
 
-    .name em {
-      font-style: italic;
-      color: var(--accent);
-    }
+.h-links{display:flex;flex-wrap:wrap;gap:12px;opacity:0;animation:fadeUp .8s ease .8s forwards;}
+.h-links a{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--mid);text-decoration:none;padding:9px 18px;border:1px solid var(--border);transition:color .25s,border-color .25s,background .25s,box-shadow .25s;}
+.h-links a:hover{color:var(--pink);border-color:var(--pink);background:var(--glow);box-shadow:0 0 16px rgba(240,160,184,.12);}
 
-    .tagline {
-      font-size: clamp(16px, 2vw, 20px);
-      color: var(--mid);
-      max-width: 480px;
-      line-height: 1.6;
-      opacity: 0;
-      animation: fadeUp 0.9s ease 0.5s forwards;
-      font-style: italic;
-    }
+.h-bg-num{position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-size:clamp(220px,30vw,420px);font-weight:700;color:transparent;-webkit-text-stroke:1px var(--border);pointer-events:none;z-index:0;opacity:0;line-height:1;animation:fadeUp 1.2s ease .4s forwards;}
 
-    .header-line {
-      width: 60px; height: 1px;
-      background: var(--ink);
-      margin: 36px 0;
-      opacity: 0;
-      animation: expandLine 0.8s ease 0.65s forwards;
-    }
+.scroll-hint{position:absolute;bottom:40px;left:56px;font-family:var(--mono);font-size:9px;letter-spacing:.25em;color:var(--border);text-transform:uppercase;writing-mode:vertical-lr;opacity:0;animation:fadeUp .8s ease 1.2s forwards;}
 
-    .contact-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-      opacity: 0;
-      animation: fadeUp 0.8s ease 0.8s forwards;
-    }
+/* ══════════ SECTION STRUCTURE ══════════ */
+section{padding:100px 0;border-top:1px solid var(--border);position:relative;}
 
-    .contact-row a {
-      font-family: var(--mono);
-      font-size: 12px;
-      letter-spacing: 0.12em;
-      color: var(--mid);
-      text-decoration: none;
-      text-transform: uppercase;
-      border-bottom: 1px solid transparent;
-      transition: color 0.25s, border-color 0.25s;
-    }
-    .contact-row a:hover { color: var(--accent); border-color: var(--accent); }
+.sec-head{display:flex;align-items:flex-end;gap:20px;margin-bottom:64px;}
+.sec-num{font-size:72px;font-weight:700;color:var(--border);line-height:1;flex-shrink:0;transition:color .3s;letter-spacing:-.04em;}
+section:hover .sec-num{color:rgba(240,160,184,.1);}
+.sec-info{flex:1;}
+.sec-tag{font-family:var(--mono);font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--pink);margin-bottom:6px;}
+.sec-title{font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-.02em;}
+.sec-rule{width:1px;height:56px;background:linear-gradient(to bottom,var(--pink),transparent);flex-shrink:0;margin-left:16px;}
 
-    .scroll-hint {
-      position: absolute;
-      bottom: 40px; left: 40px;
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      color: var(--faint);
-      text-transform: uppercase;
-      writing-mode: vertical-lr;
-      opacity: 0;
-      animation: fadeUp 0.8s ease 1.1s forwards;
-    }
+/* ══════════ ABOUT ══════════ */
+.about-layout{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;}
+.about-body{font-size:17px;line-height:1.85;color:rgba(240,238,245,.8);}
+.about-body p+p{margin-top:20px;}
+.about-body em{color:var(--pink);font-style:normal;}
 
-    /* ── DIVIDER ── */
-    .divider {
-      height: 1px;
-      background: var(--faint);
-      margin: 0;
-    }
+.traits{list-style:none;}
+.traits li{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--mid);transition:color .2s,padding-left .2s,border-color .2s;position:relative;}
+.traits li:first-child{border-top:1px solid var(--border);}
+.traits li:hover{color:var(--pink);padding-left:8px;border-color:rgba(240,160,184,.25);}
+.t-dot{width:4px;height:4px;border-radius:50%;background:var(--pink);flex-shrink:0;opacity:.5;transition:opacity .2s,transform .2s;}
+.traits li:hover .t-dot{opacity:1;transform:scale(1.8);}
 
-    /* ── SECTIONS ── */
-    section {
-      padding: 80px 0;
-      border-bottom: 1px solid var(--faint);
-    }
-    section:last-of-type { border-bottom: none; }
+/* ══════════ STATS BAND ══════════ */
+.stats-band{background:var(--panel);border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);position:relative;overflow:hidden;margin:0 -56px;}
+.stats-band::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(240,160,184,.03));pointer-events:none;}
+.stat-cell{padding:48px 40px;border-right:1px solid var(--border);position:relative;overflow:hidden;transition:background .3s;}
+.stat-cell:last-child{border-right:none;}
+.stat-cell::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--pink2),var(--pink3));transform:scaleX(0);transform-origin:left;transition:transform .4s ease;}
+.stat-cell:hover{background:rgba(240,160,184,.04);}
+.stat-cell:hover::after{transform:scaleX(1);}
+.stat-val{font-size:44px;font-weight:700;line-height:1;letter-spacing:-.03em;background:linear-gradient(135deg,var(--pink3),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;margin-bottom:10px;}
+.stat-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--mid);}
 
-    .section-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--mid);
-      margin-bottom: 48px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--faint);
-    }
+/* ══════════ SKILLS ══════════ */
+.skills-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:2px;}
+.sk{background:var(--panel);padding:28px 26px;position:relative;overflow:visible;transition:background .25s,transform .25s;border:1px solid var(--border);}
+.sk::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--pink),transparent);transform:scaleX(0);transition:transform .4s;}
+.sk:hover{background:rgba(240,160,184,.05);transform:translateY(-3px);border-color:rgba(240,160,184,.18);z-index:10;}
+.sk:hover::before{transform:scaleX(1);}
+.sk-cat{font-family:var(--mono);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--pink);margin-bottom:10px;}
+.sk-name{font-size:16px;font-weight:500;color:var(--white);}
 
-    /* ── ABOUT ── */
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 60px;
-      align-items: start;
-    }
+/* ══════════ TOOLTIP SYSTEM ══════════ */
+.has-tip{position:relative;}
+.tip{position:absolute;z-index:500;bottom:calc(100% + 14px);left:50%;transform:translateX(-50%) translateY(8px);width:250px;background:var(--navy);border:1px solid var(--border);color:rgba(240,238,245,.85);padding:16px 18px;font-family:var(--sans);font-size:13px;font-weight:300;line-height:1.6;pointer-events:none;opacity:0;transition:opacity .22s,transform .22s;box-shadow:0 12px 40px rgba(0,0,0,.6),0 0 0 1px rgba(240,160,184,.08);}
+.tip::before{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%) rotate(45deg);width:8px;height:8px;background:var(--navy);border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+.has-tip:hover .tip{opacity:1;transform:translateX(-50%) translateY(0);}
+.tip.tl{left:0;transform:translateX(0) translateY(8px);}
+.tip.tl::before{left:16px;transform:rotate(45deg);}
+.has-tip:hover .tip.tl{transform:translateX(0) translateY(0);}
+.tip.tr{left:auto;right:0;transform:translateX(0) translateY(8px);}
+.tip.tr::before{left:auto;right:16px;transform:rotate(45deg);}
+.has-tip:hover .tip.tr{transform:translateX(0) translateY(0);}
+.tip.tb{bottom:auto;top:calc(100% + 14px);transform:translateX(-50%) translateY(-8px);}
+.tip.tb::before{bottom:auto;top:-5px;border:none;border-top:1px solid var(--border);border-left:1px solid var(--border);}
+.has-tip:hover .tip.tb{transform:translateX(-50%) translateY(0);}
 
-    .about-text {
-      font-size: 19px;
-      line-height: 1.8;
-      color: var(--ink);
-    }
+/* ══════════ EXPERIENCE ══════════ */
+.exp-item{display:grid;grid-template-columns:180px 1fr;gap:48px;padding:40px 0;border-bottom:1px solid var(--border);position:relative;}
+.exp-item::before{content:'';position:absolute;left:-56px;top:0;bottom:0;width:2px;background:transparent;transition:background .3s;}
+.exp-item:hover::before{background:linear-gradient(to bottom,var(--pink2),transparent);}
+.exp-item:last-child{border-bottom:none;}
+.exp-date{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--pink);display:block;margin-bottom:8px;}
+.exp-co{font-family:var(--mono);font-size:11px;color:var(--mid);}
+.exp-title{font-size:22px;font-weight:600;margin-bottom:12px;letter-spacing:-.01em;}
+.exp-desc{font-size:15px;color:var(--mid);line-height:1.75;}
+.exp-extra{max-height:0;overflow:hidden;opacity:0;transition:max-height .45s ease,opacity .35s ease,margin-top .35s;font-size:14px;color:rgba(240,238,245,.6);line-height:1.7;}
+.exp-item:hover .exp-extra{max-height:200px;opacity:1;margin-top:16px;}
+.exp-hint{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--border);margin-top:12px;display:inline-flex;align-items:center;gap:6px;transition:opacity .2s;}
+.exp-hint::after{content:'+';}
+.exp-item:hover .exp-hint{opacity:0;}
 
-    .about-text p + p { margin-top: 20px; }
+/* ══════════ INTERESTS ══════════ */
+.int-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:2px;}
+.int-card{background:var(--panel);padding:40px;border:1px solid var(--border);position:relative;overflow:visible;transition:border-color .3s,background .3s;}
+.int-card:hover{border-color:rgba(240,160,184,.22);background:rgba(240,160,184,.03);}
+.int-card.wide{grid-column:span 2;}
+.int-emoji{font-size:30px;display:block;margin-bottom:16px;}
+.int-tag{font-family:var(--mono);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--pink);display:block;margin-bottom:8px;}
+.int-title{font-size:22px;font-weight:700;margin-bottom:16px;letter-spacing:-.01em;}
+.int-title em{background:linear-gradient(135deg,var(--pink3),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal;}
+.int-body{font-size:15px;color:var(--mid);line-height:1.75;}
+.int-body+.int-body{margin-top:12px;}
+.int-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;}
+.pill{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:6px 12px;border:1px solid var(--border);color:var(--mid);transition:border-color .2s,color .2s;position:relative;}
+.int-card:hover .pill{border-color:rgba(240,160,184,.3);color:var(--pink3);}
+.pats-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(12,35,64,.9);border:1px solid rgba(198,12,48,.3);color:#C8C9CA;padding:10px 18px;font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;margin-top:20px;}
+.pats-r{color:#C60C30;}
+.wh-bar{height:2px;background:linear-gradient(90deg,#8B1A1A,#C0392B,#FFD700,#C0392B,#8B1A1A);margin-bottom:20px;opacity:.65;box-shadow:0 0 6px rgba(255,215,0,.15);}
+.platforms{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+.plat{font-family:var(--mono);font-size:10px;letter-spacing:.12em;padding:7px 14px;border:1px solid var(--border);color:var(--mid);text-transform:uppercase;transition:border-color .2s,color .2s;position:relative;}
+.int-card:hover .plat{border-color:rgba(240,160,184,.3);color:var(--pink);}
+.int-aside{font-family:var(--mono);font-size:10px;color:var(--border);font-style:italic;margin-top:16px;letter-spacing:.04em;}
 
-    .traits-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
+/* ══════════ WORKING WITH ME ══════════ */
+.persona-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+.persona{background:var(--panel);padding:36px 32px;border:1px solid var(--border);transition:border-color .3s,background .3s,transform .2s;position:relative;overflow:visible;}
+.persona:hover{border-color:rgba(240,160,184,.2);background:rgba(240,160,184,.03);transform:translateY(-2px);z-index:10;}
+.p-icon{font-size:26px;margin-bottom:16px;display:block;}
+.p-title{font-size:18px;font-weight:600;margin-bottom:10px;}
+.p-desc{font-size:14px;color:var(--mid);line-height:1.7;}
+.p-extra{max-height:0;overflow:hidden;opacity:0;transition:max-height .4s ease,opacity .3s ease,margin-top .3s;font-size:13px;color:var(--pink3);font-family:var(--mono);letter-spacing:.02em;line-height:1.6;}
+.persona:hover .p-extra{max-height:120px;opacity:1;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);}
 
-    .traits-list li {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--faint);
-      font-family: var(--mono);
-      font-size: 13px;
-      letter-spacing: 0.04em;
-      color: var(--ink);
-      transition: color 0.2s;
-    }
-    .traits-list li:first-child { border-top: 1px solid var(--faint); }
-    .traits-list li:hover { color: var(--accent); }
+/* ══════════ CONTACT / FOOTER ══════════ */
+.contact-block{display:flex;flex-wrap:wrap;gap:60px;align-items:flex-end;padding:80px 0 60px;border-top:1px solid var(--border);}
+.contact-email{font-size:clamp(20px,3.5vw,38px);font-weight:700;letter-spacing:-.02em;background:linear-gradient(135deg,var(--pink3),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;transition:filter .25s;}
+.contact-email:hover{filter:brightness(1.2);}
+.contact-meta{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);line-height:2.2;margin-left:auto;}
+footer{padding:40px 0;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);flex-wrap:wrap;gap:16px;}
+.f-name{font-size:22px;font-weight:700;letter-spacing:-.01em;background:linear-gradient(135deg,var(--pink3),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.f-note{font-family:var(--mono);font-size:9px;color:var(--border);letter-spacing:.2em;text-align:right;line-height:2;}
 
-    .trait-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      flex-shrink: 0;
-    }
+/* ══════════ ANIMATIONS ══════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(200%)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 6px var(--pink)}50%{box-shadow:0 0 16px var(--pink)}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.on{opacity:1;transform:none;}
 
-    /* ── SKILLS ── */
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 2px;
-    }
-
-    .skill-card {
-      background: white;
-      padding: 28px 24px;
-      transition: background 0.25s, transform 0.25s;
-      position: relative;
-      overflow: hidden;
-    }
-    .skill-card::before {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0;
-      height: 2px; width: 0;
-      background: var(--accent);
-      transition: width 0.3s ease;
-    }
-    .skill-card:hover { background: var(--accent-light); transform: translateY(-2px); }
-    .skill-card:hover::before { width: 100%; }
-
-    .skill-category {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--mid);
-      margin-bottom: 10px;
-    }
-
-    .skill-name {
-      font-size: 17px;
-      font-weight: 400;
-      color: var(--ink);
-    }
-
-    /* ── EXPERIENCE ── */
-    .experience-item {
-      display: grid;
-      grid-template-columns: 160px 1fr;
-      gap: 40px;
-      padding: 36px 0;
-      border-bottom: 1px solid var(--faint);
-    }
-    .experience-item:last-child { border-bottom: none; }
-
-    .exp-meta {
-      padding-top: 4px;
-    }
-
-    .exp-date {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--mid);
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    .exp-company {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--accent);
-      font-weight: 400;
-    }
-
-    .exp-title {
-      font-size: 22px;
-      font-weight: 400;
-      margin-bottom: 12px;
-      letter-spacing: -0.01em;
-    }
-
-    .exp-desc {
-      font-size: 16px;
-      color: var(--mid);
-      line-height: 1.7;
-    }
-
-    /* ── STRENGTHS BANNER ── */
-    .strengths-banner {
-      background: var(--accent);
-      color: white;
-      padding: 60px 40px;
-      margin: 0 -40px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 40px;
-    }
-
-    .strength-stat {
-      text-align: center;
-    }
-
-    .strength-number {
-      font-size: 48px;
-      font-weight: 300;
-      line-height: 1;
-      font-style: italic;
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    .strength-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      opacity: 0.7;
-    }
-
-    /* ── PERSONALITY ── */
-    .personality-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2px;
-    }
-
-    .persona-card {
-      background: white;
-      padding: 36px 32px;
-      transition: background 0.25s;
-    }
-    .persona-card:hover { background: var(--accent-light); }
-
-    .persona-icon {
-      font-size: 28px;
-      margin-bottom: 16px;
-      display: block;
-    }
-
-    .persona-title {
-      font-size: 20px;
-      font-weight: 400;
-      margin-bottom: 10px;
-    }
-
-    .persona-desc {
-      font-size: 15px;
-      color: var(--mid);
-      line-height: 1.7;
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      padding: 60px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      flex-wrap: wrap;
-      gap: 24px;
-    }
-
-    .footer-name {
-      font-size: 32px;
-      font-weight: 300;
-      font-style: italic;
-      color: var(--ink);
-    }
-
-    .footer-note {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--mid);
-      letter-spacing: 0.12em;
-      text-align: right;
-    }
-
-    /* ── NAV ── */
-    nav {
-      position: fixed;
-      top: 0; right: 0;
-      z-index: 100;
-      padding: 32px 40px;
-      display: flex;
-      gap: 32px;
-    }
-
-    nav a {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--mid);
-      text-decoration: none;
-      transition: color 0.25s;
-    }
-    nav a:hover { color: var(--accent); }
-
-    /* ── ANIMATIONS ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes expandLine {
-      from { opacity: 0; width: 0; }
-      to   { opacity: 1; width: 60px; }
-    }
-
-    .reveal {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-    .reveal.visible {
-      opacity: 1;
-      transform: none;
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 640px) {
-      .container { padding: 0 24px; }
-      .about-grid { grid-template-columns: 1fr; gap: 40px; }
-      .experience-item { grid-template-columns: 1fr; gap: 8px; }
-      .personality-grid { grid-template-columns: 1fr; }
-      nav { display: none; }
-      .strengths-banner { margin: 0 -24px; padding: 40px 24px; }
-      .scroll-hint { display: none; }
-    }
-  </style>
+/* RESPONSIVE */
+@media(max-width:700px){
+  .wrap{padding:0 24px;}
+  .about-layout,.int-grid,.persona-grid{grid-template-columns:1fr;}
+  .int-card.wide{grid-column:span 1;}
+  .exp-item{grid-template-columns:1fr;gap:8px;}
+  .stats-band{grid-template-columns:1fr 1fr;margin:0 -24px;}
+  .stat-cell{padding:32px 20px;}
+  nav{display:none;}
+  .scroll-hint{display:none;}
+  .tip{display:none;}
+  .h-bg-num{display:none;}
+}
+</style>
 </head>
 <body>
 
-  <div id="cursor"></div>
-  <div id="progress"></div>
+<canvas id="petals"></canvas>
+<div id="cur"></div>
+<div id="prog"></div>
 
-  <nav>
-    <a href="#about">About</a>
-    <a href="#skills">Skills</a>
-    <a href="#experience">Experience</a>
-    <a href="#contact">Contact</a>
-  </nav>
+<nav>
+  <a href="#about">About</a>
+  <a href="#skills">Skills</a>
+  <a href="#experience">Experience</a>
+  <a href="#interests">Interests</a>
+  <a href="#contact">Contact</a>
+</nav>
 
-  <!-- HEADER -->
-  <header>
-    <div class="container">
-      <p class="header-tag">IT Engineer · Available for new opportunities</p>
-      <h1 class="name">Dylan<br><em>Townsley</em></h1>
-      <p class="tagline">Calm under fire. Quick to learn. Even quicker to laugh.</p>
-      <div class="header-line"></div>
-      <div class="contact-row">
-        <a href="mailto:dylan@email.com">dylan@email.com</a>
-        <a href="tel:+44000000000">+44 000 000 0000</a>
-        <a href="#">LinkedIn</a>
-        <a href="#">GitHub</a>
-      </div>
+<!-- HEADER -->
+<header>
+  <div class="wrap">
+    <p class="h-kicker">IT Engineer &nbsp;&#47;&#47;&nbsp; Manchester, England</p>
+    <h1 class="h-name">
+      DYLAN
+      <span class="last">TOWNSLEY</span>
+    </h1>
+    <p class="h-sub">Calm under fire. Quick to learn. Even quicker to laugh.</p>
+    <div class="h-badge">
+      <span class="h-dot"></span>
+      Available for new opportunities
     </div>
-    <span class="scroll-hint">Scroll</span>
-  </header>
-
-  <div class="divider"></div>
-
-  <!-- ABOUT -->
-  <section id="about">
-    <div class="container">
-      <p class="section-label reveal">About</p>
-      <div class="about-grid reveal">
-        <div class="about-text">
-          <p>I'm an IT Engineer who thrives where the pressure is highest. Whether it's a critical system failure at 3am or a tight deadline with moving parts, I stay focused, methodical, and get it done.</p>
-          <p>My superpower is picking up new technologies fast — not just learning them, but <em>owning</em> them. Hand me a platform I've never touched and I'll be productive within hours.</p>
-          <p>I bring the same energy to teams as I do to problems: clear communication, a genuine willingness to hear feedback, and enough humour to keep the atmosphere healthy when things get stressful.</p>
-        </div>
-        <ul class="traits-list">
-          <li><span class="trait-dot"></span>Effective under pressure</li>
-          <li><span class="trait-dot"></span>Excellent communicator</li>
-          <li><span class="trait-dot"></span>Rapid self-taught learner</li>
-          <li><span class="trait-dot"></span>Adapts to new technology fast</li>
-          <li><span class="trait-dot"></span>Welcomes constructive criticism</li>
-          <li><span class="trait-dot"></span>Collaborative & approachable</li>
-          <li><span class="trait-dot"></span>Genuinely funny (ask the team)</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- STRENGTHS BANNER -->
-  <div class="strengths-banner reveal">
-    <div class="strength-stat">
-      <span class="strength-number">∞</span>
-      <span class="strength-label">New tech absorbed</span>
-    </div>
-    <div class="strength-stat">
-      <span class="strength-number">0</span>
-      <span class="strength-label">Problems left unsolved</span>
-    </div>
-    <div class="strength-stat">
-      <span class="strength-number">100%</span>
-      <span class="strength-label">Feedback accepted</span>
-    </div>
-    <div class="strength-stat">
-      <span class="strength-number">calm</span>
-      <span class="strength-label">Default mode under fire</span>
+    <div class="h-links">
+      <a href="mailto:dtownsley92@gmail.com">dtownsley92&#64;gmail.com</a>
+      <a href="tel:+44000000000">+44 000 000 0000</a>
+      <a href="https://www.linkedin.com/in/dylan-townsley-0b4078186/" target="_blank">LinkedIn</a>
+      <a href="#">GitHub</a>
     </div>
   </div>
+  <div class="h-bg-num">01</div>
+  <span class="scroll-hint">Scroll</span>
+</header>
 
-  <!-- SKILLS -->
-  <section id="skills">
-    <div class="container">
-      <p class="section-label reveal">Technical Skills</p>
-      <div class="skills-grid reveal">
-        <div class="skill-card">
-          <p class="skill-category">Infrastructure</p>
-          <p class="skill-name">Network Configuration</p>
-        </div>
-        <div class="skill-card">
-          <p class="skill-category">Systems</p>
-          <p class="skill-name">Windows & Linux Admin</p>
-        </div>
-        <div class="skill-card">
-          <p class="skill-category">Cloud</p>
-          <p class="skill-name">Azure / AWS</p>
-        </div>
-        <div class="skill-card">
-          <p class="skill-category">Security</p>
-          <p class="skill-name">Endpoint Protection</p>
-        </div>
-        <div class="skill-card">
-          <p class="skill-category">Automation</p>
-          <p class="skill-name">PowerShell / Scripting</p>
-        </div>
-        <div class="skill-card">
-          <p class="skill-category">Support</p>
-          <p class="skill-name">Helpdesk & Escalation</p>
-        </div>
-        <div class="skill-card">
-          <p class="skill-category">Virtualisation</p>
-          <p class="skill-name">VMware / Hyper-V</p>
-        </div>
-        <div class="skill-card">
-          <p class="skill-category">Monitoring</p>
-          <p class="skill-name">System & Network Ops</p>
-        </div>
+<!-- ABOUT -->
+<section id="about">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-num">01</span>
+      <div class="sec-info">
+        <p class="sec-tag">Profile</p>
+        <h2 class="sec-title">About</h2>
       </div>
+      <div class="sec-rule"></div>
     </div>
-  </section>
-
-  <!-- EXPERIENCE -->
-  <section id="experience">
-    <div class="container">
-      <p class="section-label reveal">Experience</p>
-
-      <div class="experience-item reveal">
-        <div class="exp-meta">
-          <span class="exp-date">2023 — Present</span>
-          <span class="exp-company">Current Role</span>
-        </div>
-        <div>
-          <h3 class="exp-title">IT Engineer</h3>
-          <p class="exp-desc">Responsible for maintaining and improving core infrastructure, handling escalated support tickets, and onboarding new technologies into the stack. Known for rapid resolution of critical incidents and clear communication during high-pressure outages.</p>
-        </div>
+    <div class="about-layout reveal">
+      <div class="about-body">
+        <p>I'm an IT Engineer who thrives where the pressure is highest. Whether it's a critical system failure at 3am or a tight deadline with moving parts, I stay <em>focused</em>, methodical, and get it done.</p>
+        <p>My superpower is picking up new technologies fast &mdash; not just learning them, but <em>owning</em> them. Hand me a platform I've never touched and I'll be productive within hours.</p>
+        <p>I bring the same energy to teams as I do to problems: clear communication, a genuine willingness to hear feedback, and enough humour to keep the atmosphere <em>healthy</em> when things get stressful.</p>
       </div>
-
-      <div class="experience-item reveal">
-        <div class="exp-meta">
-          <span class="exp-date">2021 — 2023</span>
-          <span class="exp-company">Previous Role</span>
-        </div>
-        <div>
-          <h3 class="exp-title">IT Support Specialist</h3>
-          <p class="exp-desc">First and second-line support across a multi-site environment. Developed internal documentation, trained junior staff, and consistently received top feedback scores from end users for clarity and patience under pressure.</p>
-        </div>
-      </div>
-
-      <div class="experience-item reveal">
-        <div class="exp-meta">
-          <span class="exp-date">2019 — 2021</span>
-          <span class="exp-company">Earlier Role</span>
-        </div>
-        <div>
-          <h3 class="exp-title">Junior IT Technician</h3>
-          <p class="exp-desc">Started from the ground up — hardware setup, software deployment, and network troubleshooting. Self-taught a wide range of tools beyond the job spec, quickly outpacing the learning curve and taking on responsibilities above grade.</p>
-        </div>
-      </div>
-
+      <ul class="traits">
+        <li class="has-tip"><span class="t-dot"></span>Effective under pressure<div class="tip tl">When everything's on fire I get calmer, not panicked. My best work happens when the stakes are highest &mdash; ask anyone who's been in an outage with me.</div></li>
+        <li class="has-tip"><span class="t-dot"></span>Excellent communicator<div class="tip tl">VLAN misconfiguration explained to a network engineer and a CEO in the same breath. No jargon unless helpful, no waffle ever.</div></li>
+        <li class="has-tip"><span class="t-dot"></span>Rapid self-taught learner<div class="tip tl">New platform, new language &mdash; I don't wait for training. Open the docs, build something, break it, learn it properly.</div></li>
+        <li class="has-tip"><span class="t-dot"></span>Adapts to new technology fast<div class="tip tl">From legacy systems to bleeding-edge cloud tools, I get productive quickly. Change in tech is a feature, not a bug.</div></li>
+        <li class="has-tip"><span class="t-dot"></span>Welcomes constructive criticism<div class="tip tl">Feedback is free improvement &mdash; ignoring it is leaving performance on the table. I actively want to know what I'm doing wrong.</div></li>
+        <li class="has-tip"><span class="t-dot"></span>Collaborative &amp; approachable<div class="tip tl">People come to me when they're stuck &mdash; that's the highest compliment. I make time, nobody leaves feeling stupid for asking.</div></li>
+        <li class="has-tip"><span class="t-dot"></span>Genuinely funny (ask the team)<div class="tip tl">Not 'office funny' where you politely smile. Actually funny. Good humour makes incident bridges and Monday standups survivable.</div></li>
+      </ul>
     </div>
-  </section>
-
-  <!-- PERSONALITY -->
-  <section id="contact">
-    <div class="container">
-      <p class="section-label reveal">Working with Me</p>
-      <div class="personality-grid reveal">
-        <div class="persona-card">
-          <span class="persona-icon">⚡</span>
-          <h4 class="persona-title">Pressure? Bring it.</h4>
-          <p class="persona-desc">I don't freeze when systems go down or deadlines hit. I get clearer, more methodical, and more focused. The worse the situation, the better I perform.</p>
-        </div>
-        <div class="persona-card">
-          <span class="persona-icon">📡</span>
-          <h4 class="persona-title">Always communicating.</h4>
-          <p class="persona-desc">Whether it's a technical rundown for the IT team or plain English for a panicking end user, I adapt how I talk. No one's ever left wondering what's happening.</p>
-        </div>
-        <div class="persona-card">
-          <span class="persona-icon">🔬</span>
-          <h4 class="persona-title">Fast learner, full stop.</h4>
-          <p class="persona-desc">New platform, new tool, new stack — I'll have the docs open before you've finished the sentence. I don't just skim, I go deep and get autonomous quickly.</p>
-        </div>
-        <div class="persona-card">
-          <span class="persona-icon">😄</span>
-          <h4 class="persona-title">Good human to work with.</h4>
-          <p class="persona-desc">Friendly, receptive to feedback, and yes — actually funny. Healthy teams need good energy as much as good engineers. I bring both.</p>
-        </div>
-      </div>
-
-      <div style="margin-top: 80px; padding-top: 60px; border-top: 1px solid var(--faint); display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start;" class="reveal">
-        <div>
-          <p class="section-label" style="margin-bottom: 16px;">Get in touch</p>
-          <a href="mailto:dylan@email.com" style="font-size: 32px; font-weight:300; font-style:italic; color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 4px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">dylan@email.com</a>
-        </div>
-        <div style="margin-left: auto; text-align: right;">
-          <p style="font-family: var(--mono); font-size: 11px; color: var(--mid); letter-spacing: 0.12em; text-transform: uppercase; line-height: 2;">Manchester, England<br>Open to opportunities<br>Remote &amp; On-site</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <div class="container">
-    <footer>
-      <span class="footer-name">Dylan Townsley</span>
-      <p class="footer-note">IT Engineer<br>Built with intent · © 2026</p>
-    </footer>
   </div>
+</section>
 
-  <script>
-    // Custom cursor
-    const cursor = document.getElementById('cursor');
-    document.addEventListener('mousemove', e => {
-      cursor.style.left = e.clientX + 'px';
-      cursor.style.top  = e.clientY + 'px';
+<!-- STATS BAND -->
+<div class="stats-band reveal">
+  <div class="stat-cell has-tip">
+    <span class="stat-val">&#8734;</span>
+    <span class="stat-lbl">New tech absorbed</span>
+    <div class="tip tl">From PowerShell to Kubernetes to tools that didn't exist six months ago &mdash; if it solves a problem, I'll learn it. No limit.</div>
+  </div>
+  <div class="stat-cell has-tip">
+    <span class="stat-val">0</span>
+    <span class="stat-lbl">Problems left unsolved</span>
+    <div class="tip tl">I don't close tickets, I close problems. Root cause found, fixed properly, first time.</div>
+  </div>
+  <div class="stat-cell has-tip">
+    <span class="stat-val">100%</span>
+    <span class="stat-lbl">Feedback accepted</span>
+    <div class="tip tr">Criticism doesn't sting, it sharpens. I've never responded to feedback with defensiveness. It's data, and data is useful.</div>
+  </div>
+  <div class="stat-cell has-tip">
+    <span class="stat-val">calm</span>
+    <span class="stat-lbl">Default mode under fire</span>
+    <div class="tip tr">The calmest person in a P1 incident is usually the one solving it. Panic is just wasted compute.</div>
+  </div>
+</div>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-num">02</span>
+      <div class="sec-info">
+        <p class="sec-tag">Capabilities</p>
+        <h2 class="sec-title">Technical Skills</h2>
+      </div>
+      <div class="sec-rule"></div>
+    </div>
+    <div class="skills-grid reveal">
+      <div class="sk has-tip"><p class="sk-cat">Infrastructure</p><p class="sk-name">Network Configuration</p><div class="tip tb">Switching, routing, VLANs, firewalls, VPNs &mdash; designed, deployed and troubleshot from small offices to multi-site enterprise environments.</div></div>
+      <div class="sk has-tip"><p class="sk-cat">Systems</p><p class="sk-name">Windows &amp; Linux Admin</p><div class="tip tb">Active Directory, Group Policy, server hardening, user lifecycle. Equally comfortable in a terminal as a GUI. Linux is not scary &mdash; just faster.</div></div>
+      <div class="sk has-tip"><p class="sk-cat">Cloud</p><p class="sk-name">Azure / AWS</p><div class="tip tb">VM provisioning, IAM, storage, hybrid setups, cost management. Cloud is someone else's computer I know how to configure properly.</div></div>
+      <div class="sk has-tip"><p class="sk-cat">Security</p><p class="sk-name">Endpoint Protection</p><div class="tip tb">EDR, patch management, zero-trust principles, phishing defence. Security is baked in, not bolted on at the end.</div></div>
+      <div class="sk has-tip"><p class="sk-cat">Automation</p><p class="sk-name">PowerShell / Scripting</p><div class="tip tb">If I've done a task manually twice, it becomes a script. Automate the boring, focus on the interesting.</div></div>
+      <div class="sk has-tip"><p class="sk-cat">Support</p><p class="sk-name">Helpdesk &amp; Escalation</p><div class="tip tb">First, second and third line. Fast triage, clear communication under pressure, escalate only when genuinely needed.</div></div>
+      <div class="sk has-tip"><p class="sk-cat">Virtualisation</p><p class="sk-name">VMware / Hyper-V</p><div class="tip tb">vSphere, vCenter, Hyper-V cluster management, snapshots, migrations. Virtualisation is where things get interesting.</div></div>
+      <div class="sk has-tip"><p class="sk-cat">Monitoring</p><p class="sk-name">System &amp; Network Ops</p><div class="tip tb">Proactive monitoring, alerting, dashboards, log analysis. Catch the problem at 2% CPU rather than 100%.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-num">03</span>
+      <div class="sec-info">
+        <p class="sec-tag">Career</p>
+        <h2 class="sec-title">Experience</h2>
+      </div>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="exp-item reveal">
+      <div>
+        <span class="exp-date">2023 &mdash; Present</span>
+        <span class="exp-co">Current Role</span>
+      </div>
+      <div>
+        <h3 class="exp-title">IT Engineer</h3>
+        <p class="exp-desc">Maintaining and improving core infrastructure, handling escalated support tickets, and onboarding new technologies. Known for rapid incident resolution and clear communication during high-pressure outages.</p>
+        <span class="exp-hint">Key highlights</span>
+        <div class="exp-extra">Led migration of on-premise services to Azure hybrid environment, reducing downtime by 40%. Introduced automated onboarding scripts cutting new-starter setup from 2 hours to 15 minutes. Became the unofficial go-to for P1 incidents &mdash; not by title, just inevitably.</div>
+      </div>
+    </div>
+
+    <div class="exp-item reveal">
+      <div>
+        <span class="exp-date">2021 &mdash; 2023</span>
+        <span class="exp-co">Previous Role</span>
+      </div>
+      <div>
+        <h3 class="exp-title">IT Support Specialist</h3>
+        <p class="exp-desc">First and second-line support across a multi-site environment. Built the team's internal documentation library, trained junior staff, and consistently scored highest in end-user satisfaction.</p>
+        <span class="exp-hint">Key highlights</span>
+        <div class="exp-extra">Wrote 30+ runbook guides still in active use today. Mentored two junior technicians, both promoted within 12 months. Highest end-user satisfaction score in the department two consecutive quarters running.</div>
+      </div>
+    </div>
+
+    <div class="exp-item reveal">
+      <div>
+        <span class="exp-date">2019 &mdash; 2021</span>
+        <span class="exp-co">Earlier Role</span>
+      </div>
+      <div>
+        <h3 class="exp-title">Junior IT Technician</h3>
+        <p class="exp-desc">Ground-up start &mdash; hardware, software, networking. Self-taught well beyond the job spec and quickly outpaced the expected learning curve, taking on mid-level responsibilities within months.</p>
+        <span class="exp-hint">Key highlights</span>
+        <div class="exp-extra">Within 6 months handling tasks typically assigned to mid-level staff. Took full ownership of server room management off own initiative. This is where the self-teaching habit began &mdash; and never stopped.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERESTS -->
+<section id="interests">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-num">04</span>
+      <div class="sec-info">
+        <p class="sec-tag">Life Outside Work</p>
+        <h2 class="sec-title">Interests</h2>
+      </div>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="int-grid reveal">
+      <div class="int-card wide">
+        <span class="int-emoji">&#127944;</span>
+        <span class="int-tag">Sport &middot; American Football</span>
+        <h3 class="int-title">New England <em>Patriots</em></h3>
+        <p class="int-body">A die-hard Patriots fan &mdash; which, depending on who you ask, shows either admirable loyalty or questionable taste in the post-Brady era. Either way, I'm committed. American football appeals to me for the same reasons IT does: complex systems, split-second decisions under pressure, and the satisfaction of a play coming together perfectly after hours of preparation.</p>
+        <div class="pats-badge"><span class="pats-r">&#9733;</span> New England Patriots &middot; Fan Since Day One</div>
+        <div class="int-pills">
+          <span class="pill has-tip">NFL Sunday Ritual<div class="tip tb">Game day is sacred. Phone on silent, snacks sorted, no plans until the final whistle.</div></span>
+          <span class="pill has-tip">Offensive Strategy Nerd<div class="tip tb">Play design, formation reads, route trees &mdash; the chess-like depth of NFL offence is genuinely fascinating.</div></span>
+          <span class="pill has-tip">Playoff Season Survivalist<div class="tip tb">The Patriots playoff record is legitimately impressive. Post-Brady? We endure. We rebuild. We believe.</div></span>
+          <span class="pill has-tip">Brady Era Veteran<div class="tip tb">I was there for all of it. The comebacks, the rings, deflategate. Every bit worth it.</div></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="int-grid reveal">
+      <div class="int-card">
+        <span class="int-emoji">&#9876;&#65039;</span>
+        <div class="wh-bar"></div>
+        <span class="int-tag">Hobby &middot; Miniature Wargaming</span>
+        <h3 class="int-title">Warhammer <em>40,000</em></h3>
+        <p class="int-body">In the grim darkness of the far future, there is only hobby budget. Warhammer 40K is my long-form creative outlet &mdash; painting, lore, tactical gameplay. There's something deeply satisfying about hand-painting a Space Marine for three hours, only for a bad dice roll to end it in five minutes.</p>
+        <p class="int-body">The hobby demands patience, precision, and an appreciation for deeply complex interconnected systems &mdash; skills that translate well to IT infrastructure.</p>
+        <div class="int-pills">
+          <span class="pill has-tip">Miniature Painter<div class="tip">Hours of careful basecoating, highlighting and washes for a model that fits in your palm. Meditative. Also a financial hazard.</div></span>
+          <span class="pill has-tip">Lore Enthusiast<div class="tip">30+ years of lore. Space Marines, Chaos, Necrons &mdash; genuinely exceptional sci-fi worldbuilding.</div></span>
+          <span class="pill has-tip">Tabletop Tactician<div class="tip">List-building involves real combinatorial thinking. Applied maths with dice and tiny painted soldiers.</div></span>
+          <span class="pill has-tip">Chapter TBC<div class="tip">Ultramarines feel too obvious. Dark Angels have great lore. Space Wolves are tempting. The struggle is real.</div></span>
+        </div>
+        <p class="int-aside">// "For the Emperor" &mdash; and also a well-rolled save throw.</p>
+      </div>
+
+      <div class="int-card">
+        <span class="int-emoji">&#127918;</span>
+        <span class="int-tag">Hobby &middot; Gaming</span>
+        <h3 class="int-title">Video <em>Games</em></h3>
+        <p class="int-body">Gaming is where my love of technology started. There's a direct line between the kid who wanted to know how games worked and the engineer who wants to know how everything works. It keeps problem-solving instincts sharp and, honestly, it's just a lot of fun.</p>
+        <p class="int-body">Single-player epics, competitive multiplayer, or strategy games with mechanics complex enough to need a spreadsheet &mdash; I'm in for all of it.</p>
+        <div class="platforms">
+          <span class="plat has-tip">PC<div class="tip">Custom-built, well-maintained, perpetually in need of one more upgrade.</div></span>
+          <span class="plat has-tip">Console<div class="tip">Convenient, couch-friendly, no graphics settings to tweak for 45 minutes first.</div></span>
+          <span class="plat has-tip">Strategy<div class="tip">Grand campaigns, resource management, cascading consequences. Catnip.</div></span>
+          <span class="plat has-tip">RPG<div class="tip">Open worlds, deep builds, side quests that end up better than the main story.</div></span>
+          <span class="plat has-tip">FPS<div class="tip">Sharp, fast, satisfying. Also very good for telling teammates how they could improve.</div></span>
+        </div>
+        <p class="int-aside">// Gaming since before it was cool to admit it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORKING WITH ME + CONTACT -->
+<section id="contact">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-num">05</span>
+      <div class="sec-info">
+        <p class="sec-tag">Collaboration</p>
+        <h2 class="sec-title">Working with Me</h2>
+      </div>
+      <div class="sec-rule"></div>
+    </div>
+    <div class="persona-grid reveal">
+      <div class="persona">
+        <span class="p-icon">&#9889;</span>
+        <h4 class="p-title">Pressure? Bring it.</h4>
+        <p class="p-desc">I don't freeze when systems go down. I get clearer, more methodical, more focused. The worse the situation, the better I perform.</p>
+        <div class="p-extra">First on P1s at midnight, kept everyone calm, root cause identified before most people woke up. Pressure isn't a problem &mdash; it's fuel.</div>
+      </div>
+      <div class="persona">
+        <span class="p-icon">&#128225;</span>
+        <h4 class="p-title">Always communicating.</h4>
+        <p class="p-desc">Technical rundown for engineers or plain English for a panicking user &mdash; I adapt. No one is ever left wondering what's happening.</p>
+        <div class="p-extra">Good incident updates, honest timelines, no jargon as a shield. Clear communication is a technical skill and I treat it that way.</div>
+      </div>
+      <div class="persona">
+        <span class="p-icon">&#128300;</span>
+        <h4 class="p-title">Fast learner, full stop.</h4>
+        <p class="p-desc">New platform, new stack &mdash; docs open before you finish the sentence. I don't skim, I go deep and get autonomous fast.</p>
+        <div class="p-extra">Taught myself networking, cloud, scripting &mdash; because I needed to and couldn't wait for a course. Curiosity is my most reliable skill and it never switches off.</div>
+      </div>
+      <div class="persona">
+        <span class="p-icon">&#128516;</span>
+        <h4 class="p-title">Good human to work with.</h4>
+        <p class="p-desc">Friendly, receptive to feedback, and yes &mdash; actually funny. Teams need good energy as much as good engineers. I bring both.</p>
+        <div class="p-extra">The colleague who remembers birthdays, diffuses tension with a well-timed joke, and still gets everything done. Culture matters. I contribute to it.</div>
+      </div>
+    </div>
+
+    <div class="contact-block reveal">
+      <div>
+        <p style="font-family:var(--mono);font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--pink);margin-bottom:16px;">Get in touch</p>
+        <a href="mailto:dtownsley92@gmail.com" class="contact-email">dtownsley92&#64;gmail.com</a>
+      </div>
+      <div class="contact-meta">
+        Manchester, England<br>
+        Open to opportunities<br>
+        Remote &amp; On-site
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="wrap">
+  <footer>
+    <span class="f-name">Dylan Townsley</span>
+    <p class="f-note">IT Engineer &nbsp;&middot;&nbsp; &copy; 2026</p>
+  </footer>
+</div>
+
+<script>
+// FALLING PETALS
+(function(){
+  var c=document.getElementById('petals');
+  var ctx=c.getContext('2d');
+  var W,H,petals=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  resize();
+  window.addEventListener('resize',resize);
+  var COLORS=['rgba(240,160,184,','rgba(255,212,227,','rgba(232,116,154,','rgba(255,182,205,'];
+  function Petal(){
+    this.reset=function(){
+      this.x=Math.random()*W;
+      this.y=-20;
+      this.size=Math.random()*7+4;
+      this.speedY=Math.random()*1+0.3;
+      this.speedX=Math.random()*.8-.4;
+      this.rot=Math.random()*Math.PI*2;
+      this.rotSpeed=(Math.random()-.5)*.035;
+      this.alpha=Math.random()*.45+.15;
+      this.col=COLORS[Math.floor(Math.random()*COLORS.length)];
+      this.sway=Math.random()*1.8;
+      this.swaySpeed=Math.random()*.018;
+      this.swayT=Math.random()*Math.PI*2;
+    };
+    this.reset();
+    this.y=Math.random()*H;
+  }
+  for(var i=0;i<65;i++) petals.push(new Petal());
+  function draw(p){
+    ctx.save();
+    ctx.translate(p.x,p.y);
+    ctx.rotate(p.rot);
+    ctx.globalAlpha=p.alpha;
+    ctx.beginPath();
+    ctx.moveTo(0,-p.size);
+    ctx.bezierCurveTo(p.size*.55,-p.size*.5,p.size*.55,p.size*.5,0,p.size*.3);
+    ctx.bezierCurveTo(-p.size*.55,p.size*.5,-p.size*.55,-p.size*.5,0,-p.size);
+    ctx.fillStyle=p.col+'0.85)';
+    ctx.fill();
+    ctx.restore();
+  }
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    petals.forEach(function(p){
+      p.swayT+=p.swaySpeed;
+      p.x+=p.speedX+Math.sin(p.swayT)*p.sway;
+      p.y+=p.speedY;
+      p.rot+=p.rotSpeed;
+      if(p.y>H+20||p.x<-30||p.x>W+30) p.reset();
+      draw(p);
     });
-    document.querySelectorAll('a, .skill-card, .persona-card').forEach(el => {
-      el.addEventListener('mouseenter', () => cursor.classList.add('expanded'));
-      el.addEventListener('mouseleave', () => cursor.classList.remove('expanded'));
-    });
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
 
-    // Scroll progress bar
-    const bar = document.getElementById('progress');
-    window.addEventListener('scroll', () => {
-      const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
-      bar.style.width = pct + '%';
-    });
+// CURSOR
+var cur=document.getElementById('cur');
+document.addEventListener('mousemove',function(e){
+  cur.style.left=e.clientX+'px';
+  cur.style.top=e.clientY+'px';
+});
+document.querySelectorAll('a,.sk,.persona,.int-card,.pill,.plat,.stat-cell,.traits li,.exp-item').forEach(function(el){
+  el.addEventListener('mouseenter',function(){cur.classList.add('big');});
+  el.addEventListener('mouseleave',function(){cur.classList.remove('big');});
+});
 
-    // Reveal on scroll
-    const reveals = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry, i) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => entry.target.classList.add('visible'), i * 60);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12 });
-    reveals.forEach(el => observer.observe(el));
-  </script>
+// PROGRESS BAR
+var bar=document.getElementById('prog');
+window.addEventListener('scroll',function(){
+  var pct=window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
+  bar.style.width=pct+'%';
+});
 
+// SCROLL REVEAL
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e,i){
+    if(e.isIntersecting){
+      setTimeout(function(){e.target.classList.add('on');},i*70);
+      obs.unobserve(e.target);
+    }
+  });
+},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});
+</script>
 </body>
 </html>
