@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dylan Townsley — IT Engineer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F7F5F0;
+      --ink: #111110;
+      --mid: #6B6760;
+      --faint: #E2DED7;
+      --accent: #2A4D3E;
+      --accent-light: #D6E8E1;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --mono: 'DM Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: 18px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── CURSOR ── */
+    * { cursor: none; }
+    #cursor {
+      position: fixed; top: 0; left: 0; z-index: 9999;
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      transition: transform 0.15s ease, width 0.25s ease, height 0.25s ease, background 0.25s ease;
+      mix-blend-mode: multiply;
+    }
+    #cursor.expanded { width: 40px; height: 40px; background: var(--accent); opacity: 0.3; }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      opacity: 0.025;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px;
+    }
+
+    /* ── PROGRESS BAR ── */
+    #progress {
+      position: fixed; top: 0; left: 0; z-index: 999;
+      height: 2px; width: 0%;
+      background: var(--accent);
+      transition: width 0.1s linear;
+    }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 40px;
+      position: relative; z-index: 1;
+    }
+
+    /* ── HEADER ── */
+    header {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px 0 60px;
+      position: relative;
+    }
+
+    .header-tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.2s forwards;
+    }
+
+    .name {
+      font-size: clamp(52px, 9vw, 104px);
+      font-weight: 300;
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.35s forwards;
+    }
+
+    .name em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .tagline {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--mid);
+      max-width: 480px;
+      line-height: 1.6;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.5s forwards;
+      font-style: italic;
+    }
+
+    .header-line {
+      width: 60px; height: 1px;
+      background: var(--ink);
+      margin: 36px 0;
+      opacity: 0;
+      animation: expandLine 0.8s ease 0.65s forwards;
+    }
+
+    .contact-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.8s forwards;
+    }
+
+    .contact-row a {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      color: var(--mid);
+      text-decoration: none;
+      text-transform: uppercase;
+      border-bottom: 1px solid transparent;
+      transition: color 0.25s, border-color 0.25s;
+    }
+    .contact-row a:hover { color: var(--accent); border-color: var(--accent); }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 40px; left: 40px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--faint);
+      text-transform: uppercase;
+      writing-mode: vertical-lr;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 1.1s forwards;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: var(--faint);
+      margin: 0;
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 80px 0;
+      border-bottom: 1px solid var(--faint);
+    }
+    section:last-of-type { border-bottom: none; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 48px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--faint);
+    }
+
+    /* ── ABOUT ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .about-text {
+      font-size: 19px;
+      line-height: 1.8;
+      color: var(--ink);
+    }
+
+    .about-text p + p { margin-top: 20px; }
+
+    .traits-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .traits-list li {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--faint);
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: var(--ink);
+      transition: color 0.2s;
+    }
+    .traits-list li:first-child { border-top: 1px solid var(--faint); }
+    .traits-list li:hover { color: var(--accent); }
+
+    .trait-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* ── SKILLS ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 2px;
+    }
+
+    .skill-card {
+      background: white;
+      padding: 28px 24px;
+      transition: background 0.25s, transform 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .skill-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 2px; width: 0;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+    .skill-card:hover { background: var(--accent-light); transform: translateY(-2px); }
+    .skill-card:hover::before { width: 100%; }
+
+    .skill-category {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 10px;
+    }
+
+    .skill-name {
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+
+    /* ── EXPERIENCE ── */
+    .experience-item {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 40px;
+      padding: 36px 0;
+      border-bottom: 1px solid var(--faint);
+    }
+    .experience-item:last-child { border-bottom: none; }
+
+    .exp-meta {
+      padding-top: 4px;
+    }
+
+    .exp-date {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--mid);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .exp-company {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 400;
+    }
+
+    .exp-title {
+      font-size: 22px;
+      font-weight: 400;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .exp-desc {
+      font-size: 16px;
+      color: var(--mid);
+      line-height: 1.7;
+    }
+
+    /* ── STRENGTHS BANNER ── */
+    .strengths-banner {
+      background: var(--accent);
+      color: white;
+      padding: 60px 40px;
+      margin: 0 -40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 40px;
+    }
+
+    .strength-stat {
+      text-align: center;
+    }
+
+    .strength-number {
+      font-size: 48px;
+      font-weight: 300;
+      line-height: 1;
+      font-style: italic;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .strength-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    /* ── PERSONALITY ── */
+    .personality-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+    }
+
+    .persona-card {
+      background: white;
+      padding: 36px 32px;
+      transition: background 0.25s;
+    }
+    .persona-card:hover { background: var(--accent-light); }
+
+    .persona-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .persona-title {
+      font-size: 20px;
+      font-weight: 400;
+      margin-bottom: 10px;
+    }
+
+    .persona-desc {
+      font-size: 15px;
+      color: var(--mid);
+      line-height: 1.7;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 60px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .footer-name {
+      font-size: 32px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--ink);
+    }
+
+    .footer-note {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--mid);
+      letter-spacing: 0.12em;
+      text-align: right;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; right: 0;
+      z-index: 100;
+      padding: 32px 40px;
+      display: flex;
+      gap: 32px;
+    }
+
+    nav a {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mid);
+      text-decoration: none;
+      transition: color 0.25s;
+    }
+    nav a:hover { color: var(--accent); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes expandLine {
+      from { opacity: 0; width: 0; }
+      to   { opacity: 1; width: 60px; }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .container { padding: 0 24px; }
+      .about-grid { grid-template-columns: 1fr; gap: 40px; }
+      .experience-item { grid-template-columns: 1fr; gap: 8px; }
+      .personality-grid { grid-template-columns: 1fr; }
+      nav { display: none; }
+      .strengths-banner { margin: 0 -24px; padding: 40px 24px; }
+      .scroll-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="cursor"></div>
+  <div id="progress"></div>
+
+  <nav>
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#experience">Experience</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <!-- HEADER -->
+  <header>
+    <div class="container">
+      <p class="header-tag">IT Engineer · Available for new opportunities</p>
+      <h1 class="name">Dylan<br><em>Townsley</em></h1>
+      <p class="tagline">Calm under fire. Quick to learn. Even quicker to laugh.</p>
+      <div class="header-line"></div>
+      <div class="contact-row">
+        <a href="mailto:dylan@email.com">dylan@email.com</a>
+        <a href="tel:+44000000000">+44 000 000 0000</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">GitHub</a>
+      </div>
+    </div>
+    <span class="scroll-hint">Scroll</span>
+  </header>
+
+  <div class="divider"></div>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="container">
+      <p class="section-label reveal">About</p>
+      <div class="about-grid reveal">
+        <div class="about-text">
+          <p>I'm an IT Engineer who thrives where the pressure is highest. Whether it's a critical system failure at 3am or a tight deadline with moving parts, I stay focused, methodical, and get it done.</p>
+          <p>My superpower is picking up new technologies fast — not just learning them, but <em>owning</em> them. Hand me a platform I've never touched and I'll be productive within hours.</p>
+          <p>I bring the same energy to teams as I do to problems: clear communication, a genuine willingness to hear feedback, and enough humour to keep the atmosphere healthy when things get stressful.</p>
+        </div>
+        <ul class="traits-list">
+          <li><span class="trait-dot"></span>Effective under pressure</li>
+          <li><span class="trait-dot"></span>Excellent communicator</li>
+          <li><span class="trait-dot"></span>Rapid self-taught learner</li>
+          <li><span class="trait-dot"></span>Adapts to new technology fast</li>
+          <li><span class="trait-dot"></span>Welcomes constructive criticism</li>
+          <li><span class="trait-dot"></span>Collaborative & approachable</li>
+          <li><span class="trait-dot"></span>Genuinely funny (ask the team)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- STRENGTHS BANNER -->
+  <div class="strengths-banner reveal">
+    <div class="strength-stat">
+      <span class="strength-number">∞</span>
+      <span class="strength-label">New tech absorbed</span>
+    </div>
+    <div class="strength-stat">
+      <span class="strength-number">0</span>
+      <span class="strength-label">Problems left unsolved</span>
+    </div>
+    <div class="strength-stat">
+      <span class="strength-number">100%</span>
+      <span class="strength-label">Feedback accepted</span>
+    </div>
+    <div class="strength-stat">
+      <span class="strength-number">calm</span>
+      <span class="strength-label">Default mode under fire</span>
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="container">
+      <p class="section-label reveal">Technical Skills</p>
+      <div class="skills-grid reveal">
+        <div class="skill-card">
+          <p class="skill-category">Infrastructure</p>
+          <p class="skill-name">Network Configuration</p>
+        </div>
+        <div class="skill-card">
+          <p class="skill-category">Systems</p>
+          <p class="skill-name">Windows & Linux Admin</p>
+        </div>
+        <div class="skill-card">
+          <p class="skill-category">Cloud</p>
+          <p class="skill-name">Azure / AWS</p>
+        </div>
+        <div class="skill-card">
+          <p class="skill-category">Security</p>
+          <p class="skill-name">Endpoint Protection</p>
+        </div>
+        <div class="skill-card">
+          <p class="skill-category">Automation</p>
+          <p class="skill-name">PowerShell / Scripting</p>
+        </div>
+        <div class="skill-card">
+          <p class="skill-category">Support</p>
+          <p class="skill-name">Helpdesk & Escalation</p>
+        </div>
+        <div class="skill-card">
+          <p class="skill-category">Virtualisation</p>
+          <p class="skill-name">VMware / Hyper-V</p>
+        </div>
+        <div class="skill-card">
+          <p class="skill-category">Monitoring</p>
+          <p class="skill-name">System & Network Ops</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="container">
+      <p class="section-label reveal">Experience</p>
+
+      <div class="experience-item reveal">
+        <div class="exp-meta">
+          <span class="exp-date">2023 — Present</span>
+          <span class="exp-company">Current Role</span>
+        </div>
+        <div>
+          <h3 class="exp-title">IT Engineer</h3>
+          <p class="exp-desc">Responsible for maintaining and improving core infrastructure, handling escalated support tickets, and onboarding new technologies into the stack. Known for rapid resolution of critical incidents and clear communication during high-pressure outages.</p>
+        </div>
+      </div>
+
+      <div class="experience-item reveal">
+        <div class="exp-meta">
+          <span class="exp-date">2021 — 2023</span>
+          <span class="exp-company">Previous Role</span>
+        </div>
+        <div>
+          <h3 class="exp-title">IT Support Specialist</h3>
+          <p class="exp-desc">First and second-line support across a multi-site environment. Developed internal documentation, trained junior staff, and consistently received top feedback scores from end users for clarity and patience under pressure.</p>
+        </div>
+      </div>
+
+      <div class="experience-item reveal">
+        <div class="exp-meta">
+          <span class="exp-date">2019 — 2021</span>
+          <span class="exp-company">Earlier Role</span>
+        </div>
+        <div>
+          <h3 class="exp-title">Junior IT Technician</h3>
+          <p class="exp-desc">Started from the ground up — hardware setup, software deployment, and network troubleshooting. Self-taught a wide range of tools beyond the job spec, quickly outpacing the learning curve and taking on responsibilities above grade.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PERSONALITY -->
+  <section id="contact">
+    <div class="container">
+      <p class="section-label reveal">Working with Me</p>
+      <div class="personality-grid reveal">
+        <div class="persona-card">
+          <span class="persona-icon">⚡</span>
+          <h4 class="persona-title">Pressure? Bring it.</h4>
+          <p class="persona-desc">I don't freeze when systems go down or deadlines hit. I get clearer, more methodical, and more focused. The worse the situation, the better I perform.</p>
+        </div>
+        <div class="persona-card">
+          <span class="persona-icon">📡</span>
+          <h4 class="persona-title">Always communicating.</h4>
+          <p class="persona-desc">Whether it's a technical rundown for the IT team or plain English for a panicking end user, I adapt how I talk. No one's ever left wondering what's happening.</p>
+        </div>
+        <div class="persona-card">
+          <span class="persona-icon">🔬</span>
+          <h4 class="persona-title">Fast learner, full stop.</h4>
+          <p class="persona-desc">New platform, new tool, new stack — I'll have the docs open before you've finished the sentence. I don't just skim, I go deep and get autonomous quickly.</p>
+        </div>
+        <div class="persona-card">
+          <span class="persona-icon">😄</span>
+          <h4 class="persona-title">Good human to work with.</h4>
+          <p class="persona-desc">Friendly, receptive to feedback, and yes — actually funny. Healthy teams need good energy as much as good engineers. I bring both.</p>
+        </div>
+      </div>
+
+      <div style="margin-top: 80px; padding-top: 60px; border-top: 1px solid var(--faint); display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start;" class="reveal">
+        <div>
+          <p class="section-label" style="margin-bottom: 16px;">Get in touch</p>
+          <a href="mailto:dylan@email.com" style="font-size: 32px; font-weight:300; font-style:italic; color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 4px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">dylan@email.com</a>
+        </div>
+        <div style="margin-left: auto; text-align: right;">
+          <p style="font-family: var(--mono); font-size: 11px; color: var(--mid); letter-spacing: 0.12em; text-transform: uppercase; line-height: 2;">Manchester, England<br>Open to opportunities<br>Remote &amp; On-site</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <div class="container">
+    <footer>
+      <span class="footer-name">Dylan Townsley</span>
+      <p class="footer-note">IT Engineer<br>Built with intent · © 2026</p>
+    </footer>
+  </div>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top  = e.clientY + 'px';
+    });
+    document.querySelectorAll('a, .skill-card, .persona-card').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('expanded'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('expanded'));
+    });
+
+    // Scroll progress bar
+    const bar = document.getElementById('progress');
+    window.addEventListener('scroll', () => {
+      const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+      bar.style.width = pct + '%';
+    });
+
+    // Reveal on scroll
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 60);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
