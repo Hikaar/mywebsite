@@ -6,7 +6,7 @@
 <title>Dylan Townsley &mdash; IT Engineer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=DM+Mono:wght@300;400&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -136,17 +136,9 @@ section:hover .sec-num{color:rgba(240,160,184,.1);}
 .contact-email{font-size:clamp(20px,3.5vw,38px);font-weight:700;letter-spacing:-.02em;background:linear-gradient(135deg,var(--pink3),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;transition:filter .25s;}
 .contact-email:hover{filter:brightness(1.2);}
 .contact-meta{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);line-height:2.2;margin-left:auto;}
-
-/* ── FOOTER BUTTONS ── */
 footer{padding:48px 0 40px;display:flex;flex-direction:column;align-items:center;gap:24px;border-top:1px solid var(--border);}
 .footer-btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;}
-.btn{
-  font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
-  padding:12px 28px;text-decoration:none;
-  transition:color .25s,border-color .25s,background .25s,box-shadow .25s,transform .2s;
-  display:inline-flex;align-items:center;gap:10px;
-  position:relative;overflow:hidden;
-}
+.btn{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:12px 28px;text-decoration:none;transition:color .25s,border-color .25s,background .25s,box-shadow .25s,transform .2s;display:inline-flex;align-items:center;gap:10px;position:relative;overflow:hidden;}
 .btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--glow),transparent);transform:translateX(-100%);transition:transform .5s;}
 .btn:hover::before{transform:translateX(100%);}
 .btn:hover{transform:translateY(-2px);}
@@ -156,6 +148,178 @@ footer{padding:48px 0 40px;display:flex;flex-direction:column;align-items:center
 .btn-pink:hover{box-shadow:0 0 24px rgba(240,160,184,.35);}
 .btn-icon{font-size:14px;line-height:1;}
 .footer-copy{font-family:var(--mono);font-size:9px;color:var(--border);letter-spacing:.2em;}
+
+/* ─── TERMINAL EASTER EGG ─────────────────────────────────── */
+#terminal-hint {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 200;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--border);
+  opacity: 0;
+  animation: fadeUp 1s ease 3s forwards;
+  pointer-events: none;
+  transition: color .3s;
+}
+#terminal-hint kbd {
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: var(--border);
+  font-family: inherit;
+}
+
+#terminal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(6px);
+}
+#terminal-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.terminal {
+  width: min(700px, 92vw);
+  max-height: 78vh;
+  background: #080810;
+  border: 1px solid #00ff4125;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 1px #00ff4108,
+    0 0 50px #00ff4118,
+    0 0 100px #00ff4108,
+    inset 0 0 80px rgba(0,0,0,.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.94) translateY(14px);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+#terminal-overlay.active .terminal {
+  transform: scale(1) translateY(0);
+}
+/* CRT scanlines */
+.terminal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.12) 2px,
+    rgba(0,0,0,0.12) 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+/* Phosphor glow */
+.terminal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 20%, rgba(0,255,65,0.04) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.terminal-bar {
+  background: #0e0e18;
+  border-bottom: 1px solid #00ff4115;
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+}
+.t-dot { width: 12px; height: 12px; border-radius: 50%; }
+.t-dot.red    { background: #ff5f57; box-shadow: 0 0 6px #ff5f5780; cursor: pointer; }
+.t-dot.yellow { background: #febc2e; box-shadow: 0 0 6px #febc2e80; }
+.t-dot.green  { background: #28c840; box-shadow: 0 0 6px #28c84080; }
+.bar-title {
+  flex: 1;
+  text-align: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: #00ff41;
+  opacity: 0.45;
+  letter-spacing: .12em;
+}
+
+.terminal-output {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 20px 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  line-height: 1.75;
+  color: #00ff41;
+  position: relative;
+  z-index: 20;
+  scrollbar-width: thin;
+  scrollbar-color: #00ff4125 transparent;
+}
+.terminal-output::-webkit-scrollbar { width: 4px; }
+.terminal-output::-webkit-scrollbar-thumb { background: #00ff4130; border-radius: 2px; }
+
+.tline { white-space: pre-wrap; word-break: break-word; }
+.tline.dim    { color: #00ff4155; }
+.tline.bright { color: #80ff80; text-shadow: 0 0 8px #00ff4160; }
+.tline.accent { color: #00e5ff; text-shadow: 0 0 8px #00e5ff50; }
+.tline.warn   { color: #febc2e; }
+.tline.error  { color: #ff5f57; }
+.tline.white  { color: #cdd6e0; }
+
+.terminal-input-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 20px 16px;
+  gap: 6px;
+  border-top: 1px solid #00ff4110;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+}
+.t-prompt {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: #00ff41;
+  white-space: nowrap;
+  text-shadow: 0 0 8px #00ff4180;
+}
+#terminal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: #00ff41;
+  caret-color: #00ff41;
+  text-shadow: 0 0 6px #00ff4170;
+  cursor: none;
+}
+
+@keyframes t-fadeIn { from{opacity:0;transform:translateY(2px)} to{opacity:1;transform:none} }
+.tline { animation: t-fadeIn 0.08s ease both; }
+
+/* ─── END TERMINAL ────────────────────────────────────────── */
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 @keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(200%)}}
@@ -173,6 +337,7 @@ footer{padding:48px 0 40px;display:flex;flex-direction:column;align-items:center
   .scroll-hint{display:none;}
   .tip{display:none;}
   .h-bg-num{display:none;}
+  #terminal-hint{display:none;}
 }
 </style>
 </head>
@@ -180,13 +345,34 @@ footer{padding:48px 0 40px;display:flex;flex-direction:column;align-items:center
 <canvas id="petals"></canvas>
 <div id="cur"></div>
 <div id="prog"></div>
+
+<!-- Terminal hint -->
+<div id="terminal-hint">Press <kbd>~</kbd> for a secret</div>
+
+<!-- Terminal Overlay -->
+<div id="terminal-overlay">
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="t-dot red" id="t-close"></div>
+      <div class="t-dot yellow"></div>
+      <div class="t-dot green"></div>
+      <span class="bar-title">visitor@dylan-townsley.dev — bash</span>
+    </div>
+    <div class="terminal-output" id="t-output"></div>
+    <div class="terminal-input-row">
+      <span class="t-prompt">visitor@dylan:~$&nbsp;</span>
+      <input type="text" id="terminal-input" autocomplete="off" spellcheck="false"/>
+    </div>
+  </div>
+</div>
+
 <nav>
   <a href="#about">About</a>
   <a href="#skills">Skills</a>
   <a href="#experience">Experience</a>
   <a href="#interests">Interests</a>
   <a href="#contact">Contact</a>
-  <a href="skills.html">Skills Map </a>
+  <a href="skills.html">Skills Map</a>
 </nav>
 
 <header>
@@ -359,18 +545,15 @@ footer{padding:48px 0 40px;display:flex;flex-direction:column;align-items:center
 <div class="wrap">
   <footer>
     <div class="footer-btns">
-      <a href="index.html" class="btn btn-outline">
-        <span class="btn-icon">&#8592;</span> Home
-      </a>
-      <a href="dylan_townsley_cv.pdf" download="Dylan_Townsley_CV.pdf" class="btn btn-pink">
-        <span class="btn-icon">&#8595;</span> Download CV (PDF)
-      </a>
+      <a href="index.html" class="btn btn-outline"><span class="btn-icon">&#8592;</span> Home</a>
+      <a href="dylan_townsley_cv.pdf" download="Dylan_Townsley_CV.pdf" class="btn btn-pink"><span class="btn-icon">&#8595;</span> Download CV (PDF)</a>
     </div>
     <p class="footer-copy">Dylan Townsley &nbsp;&middot;&nbsp; IT Engineer &nbsp;&middot;&nbsp; &copy; 2026</p>
   </footer>
 </div>
 
 <script>
+/* ─── PETALS ──────────────────────────────────────────────── */
 (function(){
   var c=document.getElementById('petals'),ctx=c.getContext('2d'),W,H,petals=[];
   function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
@@ -408,6 +591,7 @@ footer{padding:48px 0 40px;display:flex;flex-direction:column;align-items:center
   loop();
 })();
 
+/* ─── CURSOR ──────────────────────────────────────────────── */
 var cur=document.getElementById('cur');
 document.addEventListener('mousemove',function(e){cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
 document.querySelectorAll('a,.sk,.persona,.int-card,.pill,.plat,.stat-cell,.traits li,.exp-item,.btn').forEach(function(el){
@@ -415,18 +599,282 @@ document.querySelectorAll('a,.sk,.persona,.int-card,.pill,.plat,.stat-cell,.trai
   el.addEventListener('mouseleave',function(){cur.classList.remove('big');});
 });
 
+/* ─── PROGRESS BAR ────────────────────────────────────────── */
 var bar=document.getElementById('prog');
 window.addEventListener('scroll',function(){
   var pct=window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
   bar.style.width=pct+'%';
 });
 
+/* ─── SCROLL REVEAL ───────────────────────────────────────── */
 var obs=new IntersectionObserver(function(entries){
   entries.forEach(function(e,i){
     if(e.isIntersecting){setTimeout(function(){e.target.classList.add('on');},i*70);obs.unobserve(e.target);}
   });
 },{threshold:0.08});
 document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});
+
+/* ─── TERMINAL EASTER EGG ─────────────────────────────────── */
+(function(){
+  var overlay  = document.getElementById('terminal-overlay');
+  var output   = document.getElementById('t-output');
+  var input    = document.getElementById('terminal-input');
+  var closeBtn = document.getElementById('t-close');
+
+  var history = [], histIdx = -1;
+  var isOpen = false;
+
+  var FACTS = [
+    "I once resolved a P1 incident faster than the alerting system could page me about it.",
+    "I've named variables after football players. 'Brady' was a boolean. It never threw an exception.",
+    "My rubber duck debugger has NDA'd more server room conversations than any employee.",
+    "I documented a fix so thoroughly that the ticket auto-closed from sheer detail.",
+    "I once explained a VLAN misconfiguration to a CEO using a football play analogy. It worked.",
+    "I set up my home network the same way I'd set up an enterprise one. The WiFi has VLANs.",
+    "I've read the documentation for tools I don't even use yet. Just in case.",
+    "My first Warhammer model took 6 hours to paint. My first server migration took less.",
+    "I fix computers for family at Christmas. I do not recommend this.",
+    "I genuinely enjoy Monday mornings. Something is probably wrong with me.",
+  ];
+
+  var CMDS = {
+    help: {
+      desc: "List all commands",
+      fn: function() {
+        var lines = [
+          {t:"┌───────────────────────────────────────┐", c:"dim"},
+          {t:"│  DYLAN TOWNSLEY — VISITOR TERMINAL    │", c:"bright"},
+          {t:"└───────────────────────────────────────┘", c:"dim"},
+          {t:"", c:""},
+        ];
+        Object.keys(CMDS).forEach(function(k){
+          lines.push({t:"  " + k.padEnd(16) + "— " + CMDS[k].desc, c:"white"});
+        });
+        lines.push({t:"", c:""});
+        lines.push({t:"  ↑ / ↓ to navigate history  ·  Ctrl+L to clear", c:"dim"});
+        return lines;
+      }
+    },
+    whoami: {
+      desc: "Who is Dylan?",
+      fn: function() { return [
+        {t:"", c:""},
+        {t:"  Dylan Townsley", c:"bright"},
+        {t:"  IT Engineer — Manchester, UK", c:"white"},
+        {t:"  Calm under fire. Quick to learn.", c:"white"},
+        {t:"  Even quicker to laugh.", c:"white"},
+        {t:"", c:""},
+        {t:"  Available for new opportunities.", c:"accent"},
+      ];}
+    },
+    skills: {
+      desc: "Technical proficiency",
+      fn: function() {
+        var skills = [
+          ["Network Configuration", 92],
+          ["Windows & Linux Admin",  90],
+          ["Azure / AWS",            82],
+          ["PowerShell / Scripting", 85],
+          ["Endpoint Security",      88],
+          ["VMware / Hyper-V",       80],
+          ["Incident Management",    95],
+          ["Making Tea Correctly",   99],
+        ];
+        var lines = [{t:"SKILL MATRIX:", c:"bright"}, {t:"", c:""}];
+        skills.forEach(function(s){
+          var filled = Math.round(s[1]/5);
+          var bar = "█".repeat(filled) + "░".repeat(20-filled);
+          lines.push({t:"  " + s[0].padEnd(24) + " [" + bar + "] " + s[1] + "%", c:"white"});
+        });
+        return lines;
+      }
+    },
+    experience: {
+      desc: "Career history",
+      fn: function() { return [
+        {t:"CAREER TIMELINE:", c:"bright"},
+        {t:"", c:""},
+        {t:"  2023–Now   IT Engineer         → Current Role", c:"white"},
+        {t:"  2021–2023  IT Support Specialist → Previous Role", c:"white"},
+        {t:"  2019–2021  Junior IT Technician  → Where it started", c:"white"},
+        {t:"", c:""},
+        {t:"  Hover the Experience section for full highlights.", c:"dim"},
+      ];}
+    },
+    fact: {
+      desc: "Random fun fact about Dylan",
+      fn: function() {
+        var f = FACTS[Math.floor(Math.random() * FACTS.length)];
+        return [
+          {t:"🎲 Fun fact:", c:"accent"},
+          {t:"   " + f, c:"white"},
+        ];
+      }
+    },
+    patriots: {
+      desc: "A sensitive subject",
+      fn: function() { return [
+        {t:"🏈 New England Patriots — Fan Since Day One", c:"warn"},
+        {t:"", c:""},
+        {t:"  Yes, post-Brady. Yes, still.", c:"white"},
+        {t:"  Loyalty is not contingent on the win column.", c:"white"},
+        {t:"  We rebuild. We endure. We believe.", c:"white"},
+        {t:"", c:""},
+        {t:"  (Brady era was special and you know it.)", c:"dim"},
+      ];}
+    },
+    warhammer: {
+      desc: "For the Emperor",
+      fn: function() { return [
+        {t:"⚔  WARHAMMER 40,000", c:"bright"},
+        {t:"", c:""},
+        {t:"  Current project: Chapter TBD (the eternal question).", c:"white"},
+        {t:"  Hours spent painting last model: 6", c:"white"},
+        {t:"  Turns that model survived in-game: 1", c:"white"},
+        {t:"  Regrets: none.", c:"white"},
+        {t:"", c:""},
+        {t:"  // For the Emperor.", c:"dim"},
+      ];}
+    },
+    contact: {
+      desc: "Get in touch",
+      fn: function() { return [
+        {t:"LET'S TALK:", c:"bright"},
+        {t:"", c:""},
+        {t:"  📧  dtownsley92@gmail.com", c:"white"},
+        {t:"  💼  linkedin.com/in/dylan-townsley-0b4078186/", c:"white"},
+        {t:"", c:""},
+        {t:"  Available · Remote & On-site · Manchester, UK", c:"accent"},
+      ];}
+    },
+    sudo: {
+      desc: "Try it",
+      fn: function() { return [
+        {t:"sudo: you are not root. But the thought is appreciated.", c:"warn"},
+        {t:"", c:""},
+        {t:"  Try:  sudo hire-me", c:"dim"},
+      ];}
+    },
+    clear: { desc: "Clear the terminal", fn: function(){ clearOutput(); return null; } },
+    exit:  { desc: "Close the terminal",  fn: function(){ closeTerminal(); return null; } },
+  };
+
+  var BOOT = [
+    {t:"Establishing connection...", c:"dim",    d:0},
+    {t:"Connection established. Welcome.", c:"bright", d:280},
+    {t:"", c:"", d:340},
+    {t:"You found the terminal. Impressive.", c:"white", d:480},
+    {t:"Type 'help' to explore. Type 'fact' for something good.", c:"dim", d:620},
+    {t:"", c:"", d:680},
+  ];
+
+  function openTerminal() {
+    if (isOpen) return;
+    isOpen = true;
+    overlay.classList.add('active');
+    clearOutput();
+    BOOT.forEach(function(b){
+      setTimeout(function(){ appendLine(b.t, b.c); }, b.d);
+    });
+    setTimeout(function(){ input.focus(); }, 150);
+  }
+
+  function closeTerminal() {
+    if (!isOpen) return;
+    isOpen = false;
+    overlay.classList.remove('active');
+  }
+
+  function clearOutput() { output.innerHTML = ''; }
+
+  function appendLine(text, cls) {
+    var el = document.createElement('div');
+    el.className = 'tline' + (cls ? ' ' + cls : '');
+    el.textContent = text;
+    output.appendChild(el);
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function runCommand(raw) {
+    var trimmed = raw.trim();
+    if (!trimmed) return;
+
+    history.unshift(trimmed);
+    histIdx = -1;
+
+    // echo the command
+    appendLine('visitor@dylan:~$ ' + trimmed, 'dim');
+
+    var cmd = trimmed.toLowerCase().replace(/^sudo\s+/, '');
+
+    // special: sudo hire-me
+    if (trimmed.toLowerCase() === 'sudo hire-me' || trimmed.toLowerCase() === 'hire-me') {
+      appendLine('', '');
+      appendLine('  ✅ Executing: hire Dylan Townsley...', 'bright');
+      appendLine('  ✅ References verified.', 'white');
+      appendLine('  ✅ Offer letter drafted.', 'white');
+      appendLine('  ✅ Done. Please email dtownsley92@gmail.com to confirm.', 'accent');
+      appendLine('', '');
+      return;
+    }
+
+    if (CMDS[cmd]) {
+      var result = CMDS[cmd].fn();
+      if (result) {
+        appendLine('', '');
+        result.forEach(function(l){ appendLine(l.t, l.c); });
+        appendLine('', '');
+      }
+    } else {
+      appendLine("  bash: " + trimmed + ": command not found. Try 'help'.", 'error');
+    }
+  }
+
+  /* Input handling */
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      runCommand(input.value);
+      input.value = '';
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      histIdx = Math.min(histIdx + 1, history.length - 1);
+      input.value = history[histIdx] || '';
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      histIdx = Math.max(histIdx - 1, -1);
+      input.value = histIdx === -1 ? '' : history[histIdx];
+    } else if (e.key === 'l' && e.ctrlKey) {
+      e.preventDefault();
+      clearOutput();
+    }
+  });
+
+  /* Global tilde trigger */
+  document.addEventListener('keydown', function(e) {
+    // Don't fire if user is typing in the terminal input itself
+    if (e.target === input) return;
+    if (e.key === '`' || e.key === '~') {
+      e.preventDefault();
+      isOpen ? closeTerminal() : openTerminal();
+    }
+  });
+
+  /* Click outside to close */
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeTerminal();
+  });
+
+  closeBtn.addEventListener('click', closeTerminal);
+
+  /* Keep input focused when clicking in output area */
+  output.addEventListener('click', function() { input.focus(); });
+
+  /* Cursor hover state for terminal elements */
+  [overlay].forEach(function(el){
+    el.addEventListener('mouseenter', function(){ cur && cur.classList.add('big'); });
+    el.addEventListener('mouseleave', function(){ cur && cur.classList.remove('big'); });
+  });
+})();
 </script>
 </body>
 </html>
