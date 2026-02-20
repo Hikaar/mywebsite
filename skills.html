@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skills Universe</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #050508;
+    --surface: #0d0d14;
+    --accent: #7fffb2;
+    --accent2: #ff6b6b;
+    --accent3: #6bb5ff;
+    --accent4: #ffb86b;
+    --text: #e8e8f0;
+    --muted: #5a5a72;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+  }
+
+  body:active { cursor: grabbing; }
+
+  .header {
+    position: fixed;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .header h1 {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(127, 255, 178, 0.4);
+  }
+
+  .header p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    margin-top: 0.3rem;
+  }
+
+  canvas {
+    display: block;
+    position: fixed;
+    inset: 0;
+  }
+
+  .tooltip {
+    position: fixed;
+    background: rgba(13, 13, 20, 0.95);
+    border: 1px solid rgba(127, 255, 178, 0.3);
+    border-radius: 8px;
+    padding: 0.8rem 1.1rem;
+    font-family: 'Space Mono', monospace;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    max-width: 220px;
+  }
+
+  .tooltip.visible { opacity: 1; }
+
+  .tooltip .skill-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+
+  .tooltip .skill-cat {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .tooltip .skill-level {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+
+  .tooltip .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  .tooltip .dot.filled { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+  .legend {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 1.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .home-btn {
+    position: fixed;
+    top: 1.8rem;
+    left: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem 0.5rem 0.8rem;
+    background: rgba(13, 13, 20, 0.85);
+    border: 1px solid rgba(127, 255, 178, 0.25);
+    border-radius: 6px;
+    color: var(--accent);
+    text-decoration: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    backdrop-filter: blur(10px);
+    z-index: 20;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+
+  .home-btn:hover {
+    border-color: rgba(127, 255, 178, 0.7);
+    background: rgba(127, 255, 178, 0.08);
+    box-shadow: 0 0 16px rgba(127, 255, 178, 0.15);
+  }
+
+  .hint {
+    position: fixed;
+    bottom: 4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Skills Universe</h1>
+  <p>drag to rotate · hover to explore</p>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="tooltip" id="tooltip">
+  <div class="skill-name" id="tt-name"></div>
+  <div class="skill-cat" id="tt-cat"></div>
+  <div class="skill-level" id="tt-level"></div>
+</div>
+
+<div class="hint">scroll to zoom</div>
+
+<a href="index.html" class="home-btn" title="Back to Home">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <polyline points="9 22 9 12 15 12 15 22"/>
+  </svg>
+  <span>Home</span>
+</a>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#7fffb2;box-shadow:0 0 6px #7fffb2"></div>Frontend</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#6bb5ff;box-shadow:0 0 6px #6bb5ff"></div>Backend</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ff6b6b;box-shadow:0 0 6px #ff6b6b"></div>Data & AI</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ffb86b;box-shadow:0 0 6px #ffb86b"></div>Tools</div>
+</div>
+
+<script>
+const SKILLS = [
+  // Core / center hub
+  { id: 0, name: "You", cat: "Core", level: 5, group: "core", x: 0, y: 0, z: 0 },
+
+  // Frontend
+  { id: 1, name: "React", cat: "Frontend", level: 5, group: "frontend" },
+  { id: 2, name: "TypeScript", cat: "Frontend", level: 5, group: "frontend" },
+  { id: 3, name: "CSS / SCSS", cat: "Frontend", level: 4, group: "frontend" },
+  { id: 4, name: "Three.js", cat: "Frontend", level: 3, group: "frontend" },
+  { id: 5, name: "Next.js", cat: "Frontend", level: 4, group: "frontend" },
+  { id: 6, name: "Animation", cat: "Frontend", level: 4, group: "frontend" },
+
+  // Backend
+  { id: 7, name: "Node.js", cat: "Backend", level: 5, group: "backend" },
+  { id: 8, name: "Python", cat: "Backend", level: 5, group: "backend" },
+  { id: 9, name: "PostgreSQL", cat: "Backend", level: 4, group: "backend" },
+  { id: 10, name: "REST APIs", cat: "Backend", level: 5, group: "backend" },
+  { id: 11, name: "GraphQL", cat: "Backend", level: 3, group: "backend" },
+  { id: 12, name: "Docker", cat: "Backend", level: 4, group: "backend" },
+
+  // Data & AI
+  { id: 13, name: "Machine Learning", cat: "Data & AI", level: 4, group: "ai" },
+  { id: 14, name: "PyTorch", cat: "Data & AI", level: 3, group: "ai" },
+  { id: 15, name: "Data Analysis", cat: "Data & AI", level: 4, group: "ai" },
+  { id: 16, name: "LLMs / Prompting", cat: "Data & AI", level: 4, group: "ai" },
+
+  // Tools
+  { id: 17, name: "Git / GitHub", cat: "Tools", level: 5, group: "tools" },
+  { id: 18, name: "CI/CD", cat: "Tools", level: 4, group: "tools" },
+  { id: 19, name: "AWS", cat: "Tools", level: 3, group: "tools" },
+  { id: 20, name: "Figma", cat: "Tools", level: 4, group: "tools" },
+];
+
+const CONNECTIONS = [
+  [0,1],[0,7],[0,8],[0,13],[0,17], // hub to group leaders
+  [1,2],[1,3],[1,4],[1,5],[1,6],   // React cluster
+  [2,5],[2,7],                      // TS bridge
+  [7,8],[7,10],[7,11],[7,12],      // backend cluster
+  [8,13],[8,15],                    // python bridge
+  [13,14],[13,15],[13,16],         // AI cluster
+  [17,18],[17,20],                  // tools cluster
+  [18,19],[12,19],                  // devops bridge
+  [4,13],                           // 3D / ML bridge
+  [16,1],                           // AI ↔ frontend
+];
+
+const COLORS = {
+  core:     { fill: '#ffffff', glow: '#ffffff' },
+  frontend: { fill: '#7fffb2', glow: '#7fffb2' },
+  backend:  { fill: '#6bb5ff', glow: '#6bb5ff' },
+  ai:       { fill: '#ff6b6b', glow: '#ff6b6b' },
+  tools:    { fill: '#ffb86b', glow: '#ffb86b' },
+};
+
+// Layout: spread on sphere surface by group
+function layoutNodes() {
+  const R = 220;
+  const groups = { frontend: [], backend: [], ai: [], tools: [] };
+  SKILLS.forEach(s => { if (s.group !== 'core' && groups[s.group]) groups[s.group].push(s); });
+
+  // Group centers (on sphere)
+  const centers = {
+    frontend: { theta: Math.PI * 0.35, phi: Math.PI * 0.4 },
+    backend:  { theta: Math.PI * 0.65, phi: Math.PI * 1.1 },
+    ai:       { theta: Math.PI * 0.45, phi: Math.PI * 1.7 },
+    tools:    { theta: Math.PI * 0.7,  phi: Math.PI * 2.5 },
+  };
+
+  Object.entries(groups).forEach(([grp, nodes]) => {
+    const c = centers[grp];
+    nodes.forEach((node, i) => {
+      const angle = (i / nodes.length) * Math.PI * 2;
+      const spread = 0.38;
+      const theta = c.theta + Math.cos(angle) * spread;
+      const phi   = c.phi   + Math.sin(angle) * spread;
+      node.ox = R * Math.sin(theta) * Math.cos(phi);
+      node.oy = R * Math.cos(theta);
+      node.oz = R * Math.sin(theta) * Math.sin(phi);
+    });
+  });
+  SKILLS[0].ox = 0; SKILLS[0].oy = 0; SKILLS[0].oz = 0;
+}
+
+layoutNodes();
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('tooltip');
+const ttName = document.getElementById('tt-name');
+const ttCat  = document.getElementById('tt-cat');
+const ttLevel = document.getElementById('tt-level');
+
+let W, H;
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Rotation state
+let rotX = 0.3, rotY = 0;
+let velX = 0, velY = 0.003;
+let dragging = false, lastX, lastY;
+let zoom = 1;
+let hoveredNode = null;
+
+canvas.addEventListener('mousedown', e => {
+  dragging = true; lastX = e.clientX; lastY = e.clientY; velX = 0; velY = 0;
+});
+window.addEventListener('mouseup', () => { dragging = false; });
+window.addEventListener('mousemove', e => {
+  if (dragging) {
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    velY = dx * 0.006; velX = dy * 0.006;
+    rotY += velY; rotX += velX;
+    lastX = e.clientX; lastY = e.clientY;
+  }
+  checkHover(e.clientX, e.clientY);
+});
+canvas.addEventListener('wheel', e => {
+  zoom = Math.max(0.4, Math.min(2, zoom - e.deltaY * 0.001));
+}, { passive: true });
+
+// Touch
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    dragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; velX = 0; velY = 0;
+  }
+});
+canvas.addEventListener('touchend', () => { dragging = false; });
+canvas.addEventListener('touchmove', e => {
+  if (dragging && e.touches.length === 1) {
+    const dx = e.touches[0].clientX - lastX, dy = e.touches[0].clientY - lastY;
+    velY = dx * 0.006; velX = dy * 0.006;
+    rotY += velY; rotX += velX;
+    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+  }
+});
+
+function project(x, y, z) {
+  // Rotate Y
+  const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+  let rx = x * cosY + z * sinY;
+  let rz = -x * sinY + z * cosY;
+  // Rotate X
+  const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+  let ry = y * cosX - rz * sinX;
+  rz = y * sinX + rz * cosX;
+
+  const fov = 600 * zoom;
+  const scale = fov / (fov + rz + 300);
+  return { sx: rx * scale + W/2, sy: ry * scale + H/2, scale, z: rz };
+}
+
+function checkHover(mx, my) {
+  let closest = null, minDist = Infinity;
+  SKILLS.forEach(node => {
+    const p = project(node.ox, node.oy, node.oz);
+    const r = Math.max(6, (node.group === 'core' ? 22 : 10 + node.level * 2.5) * p.scale * zoom);
+    const d = Math.hypot(mx - p.sx, my - p.sy);
+    if (d < r + 10 && d < minDist) { minDist = d; closest = { node, p }; }
+  });
+  if (closest) {
+    hoveredNode = closest.node;
+    const { node, p } = closest;
+    ttName.textContent = node.name;
+    ttCat.textContent = node.cat;
+    ttLevel.innerHTML = Array.from({length:5}, (_,i) =>
+      `<div class="dot${i < node.level ? ' filled' : ''}"></div>`).join('');
+    const tx = Math.min(p.sx + 14, W - 240);
+    const ty = Math.min(p.sy - 20, H - 120);
+    tooltip.style.left = tx + 'px';
+    tooltip.style.top  = ty + 'px';
+    tooltip.classList.add('visible');
+  } else {
+    hoveredNode = null;
+    tooltip.classList.remove('visible');
+  }
+}
+
+// Starfield
+const stars = Array.from({length: 180}, () => ({
+  x: Math.random() * 2 - 1, y: Math.random() * 2 - 1,
+  r: Math.random() * 1.2 + 0.2, a: Math.random() * 0.5 + 0.1
+}));
+
+function drawStars() {
+  stars.forEach(s => {
+    ctx.beginPath();
+    ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(200,200,255,${s.a})`;
+    ctx.fill();
+  });
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Background gradient
+  const grad = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*0.7);
+  grad.addColorStop(0, '#090912');
+  grad.addColorStop(1, '#050508');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  drawStars();
+
+  if (!dragging) {
+    rotY += velY;
+    rotX += velX;
+    velX *= 0.97;
+    velY *= 0.97;
+    if (Math.abs(velY) < 0.0005) velY = 0.003; // keep gentle spin
+  }
+
+  // Project all nodes
+  const projected = SKILLS.map(node => ({
+    node,
+    ...project(node.ox, node.oy, node.oz)
+  }));
+
+  // Sort by depth
+  projected.sort((a, b) => a.z - b.z);
+
+  // Draw connections
+  CONNECTIONS.forEach(([ai, bi]) => {
+    const a = projected.find(p => p.node.id === ai);
+    const b = projected.find(p => p.node.id === bi);
+    if (!a || !b) return;
+
+    const isHovered = hoveredNode && (hoveredNode.id === ai || hoveredNode.id === bi);
+    const midZ = (a.z + b.z) / 2;
+    const alpha = isHovered ? 0.7 : Math.max(0.05, 0.25 - midZ/2000);
+
+    const lg = ctx.createLinearGradient(a.sx, a.sy, b.sx, b.sy);
+    const ca = COLORS[a.node.group]?.fill || '#fff';
+    const cb = COLORS[b.node.group]?.fill || '#fff';
+    lg.addColorStop(0, ca + Math.round(alpha*255).toString(16).padStart(2,'0'));
+    lg.addColorStop(1, cb + Math.round(alpha*255).toString(16).padStart(2,'0'));
+
+    ctx.beginPath();
+    ctx.moveTo(a.sx, a.sy);
+    ctx.lineTo(b.sx, b.sy);
+    ctx.strokeStyle = lg;
+    ctx.lineWidth = isHovered ? 1.5 : 0.8;
+    ctx.stroke();
+  });
+
+  // Draw nodes
+  projected.forEach(({ node, sx, sy, scale, z }) => {
+    const isHovered = hoveredNode?.id === node.id;
+    const isCore = node.group === 'core';
+    const color = COLORS[node.group] || COLORS.tools;
+
+    const baseR = isCore ? 18 : 6 + node.level * 2.5;
+    const r = baseR * scale * zoom;
+    const depthAlpha = Math.max(0.3, 1 - Math.max(0, z + 200) / 600);
+
+    // Glow
+    if (isHovered || isCore) {
+      const glowR = r * (isCore ? 3 : 4);
+      const glow = ctx.createRadialGradient(sx, sy, r*0.5, sx, sy, glowR);
+      glow.addColorStop(0, color.glow + '55');
+      glow.addColorStop(1, color.glow + '00');
+      ctx.beginPath();
+      ctx.arc(sx, sy, glowR, 0, Math.PI*2);
+      ctx.fillStyle = glow;
+      ctx.fill();
+    }
+
+    // Node body
+    const grad = ctx.createRadialGradient(sx - r*0.25, sy - r*0.25, 0, sx, sy, r);
+    grad.addColorStop(0, color.fill + 'ff');
+    grad.addColorStop(0.6, color.fill + 'cc');
+    grad.addColorStop(1, color.fill + '44');
+    ctx.beginPath();
+    ctx.arc(sx, sy, r, 0, Math.PI*2);
+    ctx.fillStyle = grad;
+    ctx.globalAlpha = depthAlpha * (isHovered ? 1 : 0.85);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Ring for hovered
+    if (isHovered) {
+      ctx.beginPath();
+      ctx.arc(sx, sy, r + 4, 0, Math.PI*2);
+      ctx.strokeStyle = color.fill + 'aa';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // Label (only for bigger nodes or hovered)
+    const showLabel = isCore || isHovered || (r > 14);
+    if (showLabel) {
+      ctx.font = `${isCore ? 700 : 600} ${Math.round(Math.max(9, Math.min(14, r * 0.85)))}px Syne, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = isCore ? '#000' : (r > 16 ? '#000' : '#fff');
+      ctx.globalAlpha = depthAlpha;
+      if (isCore) {
+        ctx.fillText(node.name, sx, sy);
+      } else if (r > 12) {
+        ctx.fillText(node.name, sx, sy);
+      } else {
+        ctx.fillStyle = color.fill;
+        ctx.globalAlpha = depthAlpha * 0.9;
+        ctx.fillText(node.name, sx, sy + r + 10);
+      }
+      ctx.globalAlpha = 1;
+    }
+  });
+
+  requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+</body>
+</html>
